@@ -162,8 +162,8 @@ onMounted(async () => {
         <div class="workspace">
             <ChatPage v-if="page === 'chat'" v-model:profile="profile" :messages="messages" :loading="loading"
                 @send="ask" @stop="stop" @reset="reset" />
-            <HistoryPage v-else-if="page === 'history'" :sessions="sessions"
-                :current-session-id="currentSessionId" @open="openSession" @delete="removeSession" />
+            <HistoryPage v-else-if="page === 'history'" :sessions="sessions" :current-session-id="currentSessionId"
+                @open="openSession" @delete="removeSession" />
             <ProfilePage v-else v-model="profile" :loading="loading" :profiles="profiles" :profile-id="profileId"
                 @select-profile="selectProfile" @new-profile="createProfile" @delete-profile="removeProfile" />
         </div>
