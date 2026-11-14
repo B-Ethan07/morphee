@@ -34,7 +34,7 @@ onMounted(async () => {
     <div class="app-shell">
         <aside class="sidebar">
             <div class="brand"><span class="brand-mark">✦</span>
-                <div><strong>Local mind</strong><small>Atelier LLM</small></div>
+                <div><strong>Morphée</strong><small>Atelier LLM</small></div>
             </div>
             <nav aria-label="Navigation principale">
                 <button :class="{ active: page === 'chat' }" @click="page = 'chat'"><span>◌</span> Conversation</button>

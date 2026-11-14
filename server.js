@@ -12,5 +12,5 @@ app.use("/api", notFound);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Chatbot sur http://localhost:${PORT}`);
+  console.log(`Morphee sur http://localhost:${PORT}`);
 });
