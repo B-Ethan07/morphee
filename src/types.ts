@@ -50,6 +50,14 @@ export interface SavedProfile {
   updatedAt: string;
 }
 
+export interface SessionSummary {
+  id: string;
+  title: string;
+  profileId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Message {
   role: Role;
   content: string;

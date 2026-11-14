@@ -4,8 +4,28 @@ import type { Length, Message, Profile, StreamEvent } from "../types";
 export function useChat() {
   const messages = ref<Message[]>([]);
   const loading = ref(false);
+  const currentSessionId = ref<string | null>(null);
   let sessionId: string = crypto.randomUUID();
   let controller: AbortController | null = null;
+
+  async function loadSession(id: string) {
+    try {
+      const res = await fetch(`/api/sessions/${id}`);
+      if (!res.ok) return null;
+      const data = (await res.json()) as {
+        id: string;
+        profileId: string;
+        profile: Profile;
+        messages: Message[];
+      };
+      sessionId = data.id;
+      currentSessionId.value = data.id;
+      messages.value = data.messages.filter((message) => message.content);
+      return { profileId: data.profileId, profile: data.profile };
+    } catch {
+      return null;
+    }
+  }
 
   onMounted(async () => {
     try {
@@ -15,8 +35,11 @@ export function useChat() {
         sessionId: string | null;
         messages: Message[];
       };
-      if (data.sessionId) sessionId = data.sessionId;
-      messages.value = data.messages.filter((message) => message.content);
+      if (data.sessionId) {
+        sessionId = data.sessionId;
+        currentSessionId.value = data.sessionId;
+        messages.value = data.messages.filter((message) => message.content);
+      }
     } catch {
       // Serveur éteint : la conversation démarre vide.
     }
@@ -37,6 +60,7 @@ export function useChat() {
     const reply = messages.value[messages.value.length - 1];
 
     loading.value = true;
+    currentSessionId.value = sessionId;
     controller = new AbortController();
 
     try {
@@ -96,10 +120,13 @@ export function useChat() {
   const stop = () => controller?.abort();
 
   function reset() {
-    void fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
+    if (currentSessionId.value) {
+      void fetch(`/api/sessions/${currentSessionId.value}`, { method: "DELETE" });
+    }
     sessionId = crypto.randomUUID();
+    currentSessionId.value = null;
     messages.value = [];
   }
 
-  return { messages, loading, send, stop, reset };
+  return { messages, loading, currentSessionId, send, stop, reset, loadSession };
 }

@@ -31,7 +31,7 @@ const profile = defineModel<Profile>({ required: true });
             <label>Profil enregistré<select :value="props.profileId"
                     @change="emit('select-profile', ($event.target as HTMLSelectElement).value)">
                     <option v-for="saved in props.profiles" :key="saved.id" :value="saved.id">
-                        {{ saved.name }} · {{ modes.find((mode) => mode.value === saved.mode)?.label }}
+                        {{ saved.name }} · {{modes.find((mode) => mode.value === saved.mode)?.label}}
                     </option>
                 </select></label>
             <button type="button" @click="emit('new-profile')">Nouveau profil RP</button>

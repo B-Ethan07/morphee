@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import ChatPage from "./components/ChatPage.vue";
+import HistoryPage from "./components/HistoryPage.vue";
 import ProfilePage from "./components/ProfilePage.vue";
 import { useChat } from "./composables/useChat";
 import { defaultProfile } from "./profile";
-import type { Profile, SavedProfile } from "./types";
+import type { Profile, SavedProfile, SessionSummary } from "./types";
 
-type Page = "chat" | "profile";
+type Page = "chat" | "profile" | "history";
 
-const { messages, loading, send, stop, reset } = useChat();
+const { messages, loading, currentSessionId, send, stop, reset, loadSession } = useChat();
 const page = ref<Page>("chat");
 const model = ref("");
 const profile = ref<Profile>({ ...defaultProfile });
 const profiles = ref<SavedProfile[]>([]);
+const sessions = ref<SessionSummary[]>([]);
 const profileId = ref("");
 const profileLoaded = ref(false);
 
@@ -41,9 +43,29 @@ watch(
     { deep: true },
 );
 
-function ask(text: string) {
-    send(text, profile.value.length, { ...profile.value }, profileId.value);
+async function ask(text: string) {
+    await send(text, profile.value.length, { ...profile.value }, profileId.value);
+    await refreshSessions();
     page.value = "chat";
+}
+
+async function refreshSessions() {
+    const res = await fetch("/api/sessions");
+    if (res.ok) sessions.value = (await res.json()) as SessionSummary[];
+}
+
+async function openSession(id: string) {
+    const loaded = await loadSession(id);
+    if (!loaded) return;
+    profileId.value = loaded.profileId;
+    profile.value = { ...loaded.profile };
+    page.value = "chat";
+}
+
+async function removeSession(id: string) {
+    if (id === currentSessionId.value) reset();
+    else await fetch(`/api/sessions/${id}`, { method: "DELETE" });
+    await refreshSessions();
 }
 
 function selectProfile(id: string) {
@@ -111,6 +133,7 @@ onMounted(async () => {
             profileId.value = saved.id;
             profile.value = { ...saved.profile };
         }
+        await refreshSessions();
     } catch {
         // Serveur éteint : le modèle reste masqué.
     } finally {
@@ -127,6 +150,8 @@ onMounted(async () => {
             </div>
             <nav aria-label="Navigation principale">
                 <button :class="{ active: page === 'chat' }" @click="page = 'chat'"><span>◌</span> Conversation</button>
+                <button :class="{ active: page === 'history' }" @click="page = 'history'"><span>☷</span>
+                    Historique</button>
                 <button :class="{ active: page === 'profile' }" @click="page = 'profile'"><span>◈</span> Profil du
                     LLM</button>
             </nav>
@@ -137,9 +162,10 @@ onMounted(async () => {
         <div class="workspace">
             <ChatPage v-if="page === 'chat'" v-model:profile="profile" :messages="messages" :loading="loading"
                 @send="ask" @stop="stop" @reset="reset" />
-            <ProfilePage v-else v-model="profile" :loading="loading" :profiles="profiles"
-                :profile-id="profileId" @select-profile="selectProfile" @new-profile="createProfile"
-                @delete-profile="removeProfile" />
+            <HistoryPage v-else-if="page === 'history'" :sessions="sessions"
+                :current-session-id="currentSessionId" @open="openSession" @delete="removeSession" />
+            <ProfilePage v-else v-model="profile" :loading="loading" :profiles="profiles" :profile-id="profileId"
+                @select-profile="selectProfile" @new-profile="createProfile" @delete-profile="removeProfile" />
         </div>
     </div>
 </template>

@@ -140,7 +140,7 @@ export function getLatestSession() {
     db
       .prepare(
         `
-    SELECT id, title, profile_snapshot AS profileSnapshot
+    SELECT id, title, profile_id AS profileId, profile_snapshot AS profileSnapshot
     FROM sessions
     ORDER BY updated_at DESC
     LIMIT 1
@@ -148,6 +148,38 @@ export function getLatestSession() {
       )
       .get() ?? null
   );
+}
+
+export function listSessions() {
+  return db
+    .prepare(
+      `
+      SELECT id, title, profile_id AS profileId, created_at AS createdAt,
+        updated_at AS updatedAt
+      FROM sessions
+      ORDER BY updated_at DESC
+    `,
+    )
+    .all();
+}
+
+export function getSessionDetails(sessionId) {
+  const session = db
+    .prepare(
+      `
+      SELECT id, title, profile_id AS profileId,
+        profile_snapshot AS profileSnapshot
+      FROM sessions
+      WHERE id = ?
+    `,
+    )
+    .get(sessionId);
+  if (!session) return null;
+  return {
+    ...session,
+    profile: JSON.parse(session.profileSnapshot),
+    messages: getMessages(sessionId),
+  };
 }
 
 export function getSession(sessionId) {
@@ -199,6 +231,18 @@ export function addMessage(sessionId, role, content) {
     timestamp,
     sessionId,
   );
+  if (role === "user") {
+    db.prepare(
+      `
+      UPDATE sessions
+      SET title = CASE
+        WHEN title = 'Nouvelle conversation' THEN ?
+        ELSE title
+      END
+      WHERE id = ?
+    `,
+    ).run(content.slice(0, 80), sessionId);
+  }
 }
 
 export function deleteSession(sessionId) {

@@ -8,6 +8,8 @@ import {
   getMessages,
   getProfile,
   getProfileById,
+  getSessionDetails,
+  listSessions,
   listProfiles,
   saveProfile,
 } from "./database.js";
@@ -50,8 +52,16 @@ router.get("/sessions/latest", (_req, res) => {
   const session = getLatestSession();
   return res.json({
     sessionId: session?.id ?? null,
+    profileId: session?.profileId ?? null,
+    profile: session ? JSON.parse(session.profileSnapshot) : null,
     messages: session ? getMessages(session.id) : [],
   });
+});
+router.get("/sessions", (_req, res) => res.json(listSessions()));
+router.get("/sessions/:id", (req, res) => {
+  const session = getSessionDetails(req.params.id);
+  if (!session) return res.status(404).json({ error: "Session introuvable." });
+  return res.json(session);
 });
 router.delete("/sessions/:id", (req, res) => {
   deleteSession(req.params.id);
