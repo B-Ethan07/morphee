@@ -3,6 +3,10 @@ export const OLLAMA_URL = process.env.OLLAMA_URL ?? "http://localhost:11434";
 export const MODEL = process.env.MODEL ?? "gemma4:e4b";
 
 export const LENGTHS = {
+  minimal: {
+    num_predict: 80,
+    hint: "Réponds en une seule phrase, avec 20 mots maximum.",
+  },
   short: { num_predict: 250, hint: "Réponds en 3 à 5 phrases maximum." },
   normal: {
     num_predict: 600,

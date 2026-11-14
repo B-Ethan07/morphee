@@ -1,5 +1,5 @@
 export type Role = "user" | "assistant";
-export type Length = "short" | "normal" | "long";
+export type Length = "minimal" | "short" | "normal" | "long";
 export type ProfileMode = "rp" | "development" | "questions";
 
 export interface Profile {
@@ -54,6 +54,7 @@ export interface SessionSummary {
   id: string;
   title: string;
   profileId: string;
+  profileName: string;
   createdAt: string;
   updatedAt: string;
 }

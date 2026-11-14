@@ -39,7 +39,7 @@ function formatDate(value: string) {
                 :class="['session-item', { active: session.id === currentSessionId }]">
                 <button class="session-open" type="button" @click="emit('open', session.id)">
                     <strong>{{ session.title }}</strong>
-                    <small>{{ formatDate(session.updatedAt) }}</small>
+                    <small>Profil : {{ session.profileName }} · {{ formatDate(session.updatedAt) }}</small>
                 </button>
                 <button class="session-delete" type="button" title="Supprimer la conversation"
                     @click="emit('delete', session.id)">Supprimer</button>

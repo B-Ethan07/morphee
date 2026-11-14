@@ -8,6 +8,7 @@ const props = defineProps<{
     profileId: string;
 }>();
 const emit = defineEmits<{
+    "save-profile": [];
     "select-profile": [id: string];
     "new-profile": [];
     "delete-profile": [id: string];
@@ -34,7 +35,8 @@ const profile = defineModel<Profile>({ required: true });
                         {{ saved.name }} · {{modes.find((mode) => mode.value === saved.mode)?.label}}
                     </option>
                 </select></label>
-            <button type="button" @click="emit('new-profile')">Nouveau profil RP</button>
+            <button type="button" @click="emit('save-profile')">Enregistrer</button>
+            <button type="button" @click="emit('new-profile')">Nouveau profil</button>
             <button type="button" :disabled="props.profiles.length <= 1"
                 @click="emit('delete-profile', props.profileId)">Supprimer</button>
         </div>
@@ -66,6 +68,7 @@ const profile = defineModel<Profile>({ required: true });
                         <option>direct</option>
                     </select></label>
                 <label>Longueur par défaut<select v-model="profile.length">
+                        <option value="minimal">Très courte</option>
                         <option value="short">Courte</option>
                         <option value="normal">Normale</option>
                         <option value="long">Détaillée</option>

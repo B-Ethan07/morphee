@@ -2,10 +2,20 @@
 import { nextTick, onMounted, ref, watch } from "vue";
 import ChatInput from "./ChatInput.vue";
 import ChatMessage from "./ChatMessage.vue";
-import type { Message, Profile } from "../types";
+import type { Message, Profile, SavedProfile } from "../types";
 
-const props = defineProps<{ messages: Message[]; loading: boolean }>();
-const emit = defineEmits<{ send: [text: string]; stop: []; reset: [] }>();
+const props = defineProps<{
+    messages: Message[];
+    loading: boolean;
+    profiles: SavedProfile[];
+    profileId: string;
+}>();
+const emit = defineEmits<{
+    send: [text: string];
+    stop: [];
+    reset: [];
+    "select-profile": [id: string];
+}>();
 const profile = defineModel<Profile>("profile", { required: true });
 
 const list = ref<HTMLElement | null>(null);
@@ -64,7 +74,9 @@ onMounted(() => {
                 :is-last="index === messages.length - 1 && !loading" @continue="ask('Continue.')" />
         </main>
 
-        <ChatInput v-model:length="profile.length" :loading="loading" @send="ask" @stop="emit('stop')" />
+        <ChatInput v-model:length="profile.length" :loading="loading" :profiles="props.profiles"
+            :profile-id="props.profileId" @send="ask" @stop="emit('stop')"
+            @select-profile="emit('select-profile', $event)" />
     </div>
 </template>
 

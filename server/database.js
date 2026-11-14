@@ -154,10 +154,12 @@ export function listSessions() {
   return db
     .prepare(
       `
-      SELECT id, title, profile_id AS profileId, created_at AS createdAt,
-        updated_at AS updatedAt
+      SELECT sessions.id, sessions.title, sessions.profile_id AS profileId,
+        profiles.name AS profileName, sessions.created_at AS createdAt,
+        sessions.updated_at AS updatedAt
       FROM sessions
-      ORDER BY updated_at DESC
+      JOIN profiles ON profiles.id = sessions.profile_id
+      ORDER BY sessions.updated_at DESC
     `,
     )
     .all();

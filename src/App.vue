@@ -76,6 +76,15 @@ function selectProfile(id: string) {
     profile.value = { ...saved.profile };
 }
 
+async function saveProfile() {
+    if (!profileId.value) return;
+    await fetch(`/api/profiles/${profileId.value}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile.value),
+    });
+}
+
 async function createProfile() {
     const newProfile: Profile = {
         ...defaultProfile,
@@ -161,11 +170,13 @@ onMounted(async () => {
 
         <div class="workspace">
             <ChatPage v-if="page === 'chat'" v-model:profile="profile" :messages="messages" :loading="loading"
-                @send="ask" @stop="stop" @reset="reset" />
+                :profiles="profiles" :profile-id="profileId" @send="ask" @stop="stop" @reset="reset"
+                @select-profile="selectProfile" />
             <HistoryPage v-else-if="page === 'history'" :sessions="sessions" :current-session-id="currentSessionId"
                 @open="openSession" @delete="removeSession" />
             <ProfilePage v-else v-model="profile" :loading="loading" :profiles="profiles" :profile-id="profileId"
-                @select-profile="selectProfile" @new-profile="createProfile" @delete-profile="removeProfile" />
+                @save-profile="saveProfile" @select-profile="selectProfile" @new-profile="createProfile"
+                @delete-profile="removeProfile" />
         </div>
     </div>
 </template>

@@ -1,15 +1,24 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue";
-import type { Length } from "../types";
+import type { Length, SavedProfile } from "../types";
 
-const props = defineProps<{ loading: boolean }>();
-const emit = defineEmits<{ send: [text: string]; stop: [] }>();
+const props = defineProps<{
+    loading: boolean;
+    profiles: SavedProfile[];
+    profileId: string;
+}>();
+const emit = defineEmits<{
+    send: [text: string];
+    stop: [];
+    "select-profile": [id: string];
+}>();
 const length = defineModel<Length>("length", { required: true });
 
 const text = ref("");
 const el = ref<HTMLTextAreaElement | null>(null);
 
 const options: { value: Length; label: string }[] = [
+    { value: "minimal", label: "Très courte" },
     { value: "short", label: "Courte" },
     { value: "normal", label: "Normale" },
     { value: "long", label: "Détaillée" },
@@ -45,6 +54,13 @@ watch(
             @keydown.enter.exact.prevent="submit"></textarea>
 
         <div class="bar">
+            <label class="profile-select">Profil : <select :value="props.profileId"
+                    @change="emit('select-profile', ($event.target as HTMLSelectElement).value)">
+                    <option v-for="profile in props.profiles" :key="profile.id" :value="profile.id">
+                        {{ profile.name }}
+                    </option>
+                </select></label>
+
             <div class="seg" role="group" aria-label="Longueur des réponses">
                 <span class="label">Réponses :</span>
                 <button v-for="o in options" :key="o.value" type="button" :class="{ active: length === o.value }"
@@ -101,6 +117,24 @@ textarea:focus-visible {
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+.profile-select {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.profile-select select {
+    max-width: 180px;
+    padding: 4px 7px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
 }
 
 .label {
