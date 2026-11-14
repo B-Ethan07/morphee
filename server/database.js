@@ -55,7 +55,8 @@ function parseProfile(row) {
 export function saveProfile(profile) {
   const id = "default";
   const timestamp = now();
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO profiles (id, name, mode, data, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
@@ -63,7 +64,8 @@ export function saveProfile(profile) {
       mode = excluded.mode,
       data = excluded.data,
       updated_at = excluded.updated_at
-  `).run(
+  `,
+  ).run(
     id,
     typeof profile.name === "string" ? profile.name : "Assistant",
     typeof profile.mode === "string" ? profile.mode : "questions",
@@ -84,11 +86,13 @@ export function createSession(profile, requestedId) {
   const id = requestedId || randomUUID();
   const timestamp = now();
   const profileId = saveProfile(profile);
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO sessions
       (id, profile_id, profile_snapshot, title, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).run(
+  `,
+  ).run(
     id,
     profileId,
     JSON.stringify(profile),
@@ -100,29 +104,43 @@ export function createSession(profile, requestedId) {
 }
 
 export function getLatestSession() {
-  return db.prepare(`
+  return (
+    db
+      .prepare(
+        `
     SELECT id, title, profile_snapshot AS profileSnapshot
     FROM sessions
     ORDER BY updated_at DESC
     LIMIT 1
-  `).get() ?? null;
+  `,
+      )
+      .get() ?? null
+  );
 }
 
 export function getSession(sessionId) {
-  return db.prepare("SELECT id FROM sessions WHERE id = ?").get(sessionId) ?? null;
+  return (
+    db.prepare("SELECT id FROM sessions WHERE id = ?").get(sessionId) ?? null
+  );
 }
 
 export function getMessages(sessionId) {
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT role, content
     FROM messages
     WHERE session_id = ?
     ORDER BY id ASC
-  `).all(sessionId);
+  `,
+    )
+    .all(sessionId);
 }
 
 export function getRecentMessages(sessionId, limit = 20) {
-  return db.prepare(`
+  return db
+    .prepare(
+      `
     SELECT role, content
     FROM (
       SELECT id, role, content
@@ -132,15 +150,19 @@ export function getRecentMessages(sessionId, limit = 20) {
       LIMIT ?
     )
     ORDER BY id ASC
-  `).all(sessionId, limit);
+  `,
+    )
+    .all(sessionId, limit);
 }
 
 export function addMessage(sessionId, role, content) {
   const timestamp = now();
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO messages (session_id, role, content, created_at)
     VALUES (?, ?, ?, ?)
-  `).run(sessionId, role, content, timestamp);
+  `,
+  ).run(sessionId, role, content, timestamp);
   db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?").run(
     timestamp,
     sessionId,
@@ -148,5 +170,7 @@ export function addMessage(sessionId, role, content) {
 }
 
 export function deleteSession(sessionId) {
-  return db.prepare("DELETE FROM sessions WHERE id = ?").run(sessionId).changes > 0;
+  return (
+    db.prepare("DELETE FROM sessions WHERE id = ?").run(sessionId).changes > 0
+  );
 }
