@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from "vue";
 import ChatPage from "./components/ChatPage.vue";
 import ProfilePage from "./components/ProfilePage.vue";
 import { useChat } from "./composables/useChat";
-import { loadProfile } from "./profile";
+import { defaultProfile } from "./profile";
 import type { Profile } from "./types";
 
 type Page = "chat" | "profile";
@@ -11,9 +11,22 @@ type Page = "chat" | "profile";
 const { messages, loading, send, stop, reset } = useChat();
 const page = ref<Page>("chat");
 const model = ref("");
-const profile = ref<Profile>(loadProfile());
+const profile = ref<Profile>({ ...defaultProfile });
+const profileLoaded = ref(false);
 
-watch(profile, (value) => localStorage.setItem("chat-profile", JSON.stringify(value)), { deep: true });
+watch(
+    profile,
+    (value) => {
+        if (profileLoaded.value) {
+            void fetch("/api/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(value),
+            });
+        }
+    },
+    { deep: true },
+);
 
 function ask(text: string) {
     send(text, profile.value.length, { ...profile.value });
@@ -22,10 +35,17 @@ function ask(text: string) {
 
 onMounted(async () => {
     try {
-        const res = await fetch("/api/config");
-        model.value = (await res.json()).model;
+        const [configRes, profileRes] = await Promise.all([
+            fetch("/api/config"),
+            fetch("/api/profile"),
+        ]);
+        model.value = (await configRes.json()).model;
+        const savedProfile = await profileRes.json();
+        if (savedProfile) profile.value = savedProfile;
     } catch {
         // Serveur éteint : le modèle reste masqué.
+    } finally {
+        profileLoaded.value = true;
     }
 });
 </script>

@@ -95,7 +95,7 @@ const profile = defineModel<Profile>({ required: true });
             </div>
         </fieldset>
 
-        <fieldset v-if="profile.mode === 'development'">
+        <fieldset v-else-if="profile.mode === 'development'">
             <legend>Paramètres développement</legend>
             <div class="form-grid">
                 <label>Langage / version / framework<textarea v-model="profile.developmentStack" rows="2" /></label>
@@ -105,7 +105,7 @@ const profile = defineModel<Profile>({ required: true });
             </div>
         </fieldset>
 
-        <fieldset v-if="profile.mode === 'questions'">
+        <fieldset v-else-if="profile.mode === 'questions'">
             <legend>Paramètres questions / savoir</legend>
             <label>Style pédagogique<textarea v-model="profile.questionsStyle" rows="2" /></label>
         </fieldset>

@@ -1,0 +1,152 @@
+import Database from "better-sqlite3";
+import { mkdirSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { randomUUID } from "node:crypto";
+
+const databasePath = resolve("data/chatbot.db");
+mkdirSync(dirname(databasePath), { recursive: true });
+
+const db = new Database(databasePath);
+db.pragma("journal_mode = WAL");
+db.pragma("foreign_keys = ON");
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS profiles (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    data TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    profile_id TEXT NOT NULL,
+    profile_snapshot TEXT NOT NULL,
+    title TEXT NOT NULL,
+    summary TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (profile_id) REFERENCES profiles(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_messages_session
+  ON messages(session_id, id);
+`);
+
+function now() {
+  return new Date().toISOString();
+}
+
+function parseProfile(row) {
+  return row ? JSON.parse(row.data) : null;
+}
+
+export function saveProfile(profile) {
+  const id = "default";
+  const timestamp = now();
+  db.prepare(`
+    INSERT INTO profiles (id, name, mode, data, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      name = excluded.name,
+      mode = excluded.mode,
+      data = excluded.data,
+      updated_at = excluded.updated_at
+  `).run(
+    id,
+    typeof profile.name === "string" ? profile.name : "Assistant",
+    typeof profile.mode === "string" ? profile.mode : "questions",
+    JSON.stringify(profile),
+    timestamp,
+    timestamp,
+  );
+  return id;
+}
+
+export function getProfile() {
+  return parseProfile(
+    db.prepare("SELECT data FROM profiles WHERE id = ?").get("default"),
+  );
+}
+
+export function createSession(profile, requestedId) {
+  const id = requestedId || randomUUID();
+  const timestamp = now();
+  const profileId = saveProfile(profile);
+  db.prepare(`
+    INSERT INTO sessions
+      (id, profile_id, profile_snapshot, title, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(
+    id,
+    profileId,
+    JSON.stringify(profile),
+    "Nouvelle conversation",
+    timestamp,
+    timestamp,
+  );
+  return id;
+}
+
+export function getLatestSession() {
+  return db.prepare(`
+    SELECT id, title, profile_snapshot AS profileSnapshot
+    FROM sessions
+    ORDER BY updated_at DESC
+    LIMIT 1
+  `).get() ?? null;
+}
+
+export function getSession(sessionId) {
+  return db.prepare("SELECT id FROM sessions WHERE id = ?").get(sessionId) ?? null;
+}
+
+export function getMessages(sessionId) {
+  return db.prepare(`
+    SELECT role, content
+    FROM messages
+    WHERE session_id = ?
+    ORDER BY id ASC
+  `).all(sessionId);
+}
+
+export function getRecentMessages(sessionId, limit = 20) {
+  return db.prepare(`
+    SELECT role, content
+    FROM (
+      SELECT id, role, content
+      FROM messages
+      WHERE session_id = ?
+      ORDER BY id DESC
+      LIMIT ?
+    )
+    ORDER BY id ASC
+  `).all(sessionId, limit);
+}
+
+export function addMessage(sessionId, role, content) {
+  const timestamp = now();
+  db.prepare(`
+    INSERT INTO messages (session_id, role, content, created_at)
+    VALUES (?, ?, ?, ?)
+  `).run(sessionId, role, content, timestamp);
+  db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?").run(
+    timestamp,
+    sessionId,
+  );
+}
+
+export function deleteSession(sessionId) {
+  return db.prepare("DELETE FROM sessions WHERE id = ?").run(sessionId).changes > 0;
+}

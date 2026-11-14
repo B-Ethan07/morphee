@@ -3,18 +3,37 @@ import {
   buildPromptProfile,
   sanitizeHistory,
 } from "../services/promptBuilder.js";
+import {
+  addMessage,
+  createSession,
+  getRecentMessages,
+  getSession,
+  saveProfile,
+} from "../database.js";
 
 export async function chatController(req, res) {
-  const { messages, length = "normal", profile = {} } = req.body ?? {};
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ error: "Le champ 'messages' est requis." });
+  const {
+    sessionId: requestedSessionId,
+    message,
+    length = "normal",
+    profile = {},
+  } = req.body ?? {};
+  if (typeof message !== "string" || !message.trim()) {
+    return res.status(400).json({ error: "Le champ 'message' est requis." });
   }
+
+  saveProfile(profile);
+  const sessionId =
+    typeof requestedSessionId === "string" && getSession(requestedSessionId)
+      ? requestedSessionId
+      : createSession(profile, requestedSessionId);
+  addMessage(sessionId, "user", message.trim());
 
   const { systemMessage, technical, think } = buildPromptProfile(
     profile,
     length,
   );
-  const history = sanitizeHistory(messages);
+  const history = sanitizeHistory(getRecentMessages(sessionId));
   const controller = new AbortController();
   res.on("close", () => controller.abort());
   const send = (event) => res.write(JSON.stringify(event) + "\n");
@@ -43,6 +62,7 @@ export async function chatController(req, res) {
     res.setHeader("Cache-Control", "no-cache");
     const decoder = new TextDecoder();
     let buffer = "";
+    let assistantContent = "";
 
     for await (const chunk of upstream.body) {
       buffer += decoder.decode(chunk, { stream: true });
@@ -52,12 +72,15 @@ export async function chatController(req, res) {
         if (!line.trim()) continue;
         const data = JSON.parse(line);
         if (data.error) throw new Error(data.error);
-        if (data.message?.content)
+        if (data.message?.content) {
+          assistantContent += data.message.content;
           send({ type: "token", content: data.message.content });
+        }
         if (data.done)
           send({ type: "done", truncated: data.done_reason === "length" });
       }
     }
+    if (assistantContent) addMessage(sessionId, "assistant", assistantContent);
     res.end();
   } catch (error) {
     if (error.name === "AbortError") return;
