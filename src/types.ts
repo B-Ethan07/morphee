@@ -41,6 +41,15 @@ export interface Profile {
   questionsStyle: string;
 }
 
+export interface SavedProfile {
+  id: string;
+  name: string;
+  mode: ProfileMode;
+  profile: Profile;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Message {
   role: Role;
   content: string;

@@ -8,12 +8,14 @@ import {
   createSession,
   getRecentMessages,
   getSession,
+  getProfileById,
   saveProfile,
 } from "../database.js";
 
 export async function chatController(req, res) {
   const {
     sessionId: requestedSessionId,
+    profileId,
     message,
     length = "normal",
     profile = {},
@@ -22,15 +24,19 @@ export async function chatController(req, res) {
     return res.status(400).json({ error: "Le champ 'message' est requis." });
   }
 
-  saveProfile(profile);
+  const selectedProfile =
+    typeof profileId === "string" && getProfileById(profileId)
+      ? getProfileById(profileId)
+      : profile;
+  const savedProfileId = saveProfile(selectedProfile, profileId);
   const sessionId =
     typeof requestedSessionId === "string" && getSession(requestedSessionId)
       ? requestedSessionId
-      : createSession(profile, requestedSessionId);
+      : createSession(selectedProfile, savedProfileId, requestedSessionId);
   addMessage(sessionId, "user", message.trim());
 
   const { systemMessage, technical, think } = buildPromptProfile(
-    profile,
+    selectedProfile,
     length,
   );
   const history = sanitizeHistory(getRecentMessages(sessionId));

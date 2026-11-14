@@ -1,8 +1,17 @@
 <script setup lang="ts">
 import { modes } from "../profile";
-import type { Profile } from "../types";
+import type { Profile, SavedProfile } from "../types";
 
-defineProps<{ loading: boolean }>();
+const props = defineProps<{
+    loading: boolean;
+    profiles: SavedProfile[];
+    profileId: string;
+}>();
+const emit = defineEmits<{
+    "select-profile": [id: string];
+    "new-profile": [];
+    "delete-profile": [id: string];
+}>();
 const profile = defineModel<Profile>({ required: true });
 </script>
 
@@ -16,6 +25,18 @@ const profile = defineModel<Profile>({ required: true });
                 </p>
             </div>
             <span class="mode-label">{{modes.find((mode) => mode.value === profile.mode)?.label}}</span>
+        </div>
+
+        <div class="profile-actions">
+            <label>Profil enregistré<select :value="props.profileId"
+                    @change="emit('select-profile', ($event.target as HTMLSelectElement).value)">
+                    <option v-for="saved in props.profiles" :key="saved.id" :value="saved.id">
+                        {{ saved.name }} · {{ modes.find((mode) => mode.value === saved.mode)?.label }}
+                    </option>
+                </select></label>
+            <button type="button" @click="emit('new-profile')">Nouveau profil RP</button>
+            <button type="button" :disabled="props.profiles.length <= 1"
+                @click="emit('delete-profile', props.profileId)">Supprimer</button>
         </div>
 
         <fieldset>
@@ -168,6 +189,33 @@ h2 {
     white-space: nowrap;
 }
 
+.profile-actions {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.profile-actions label {
+    flex: 1;
+    max-width: 430px;
+}
+
+.profile-actions button {
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.profile-actions button:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+}
+
 fieldset {
     min-width: 0;
     margin: 0 0 14px;
@@ -236,6 +284,15 @@ textarea {
     .page-heading {
         flex-direction: column;
         gap: 6px;
+    }
+
+    .profile-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .profile-actions label {
+        max-width: none;
     }
 
     .form-grid {

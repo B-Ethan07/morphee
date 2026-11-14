@@ -52,8 +52,8 @@ function parseProfile(row) {
   return row ? JSON.parse(row.data) : null;
 }
 
-export function saveProfile(profile) {
-  const id = "default";
+export function saveProfile(profile, requestedId) {
+  const id = requestedId || randomUUID();
   const timestamp = now();
   db.prepare(
     `
@@ -77,15 +77,47 @@ export function saveProfile(profile) {
 }
 
 export function getProfile() {
+  return getProfileById("default");
+}
+
+export function getProfileById(id) {
   return parseProfile(
-    db.prepare("SELECT data FROM profiles WHERE id = ?").get("default"),
+    db.prepare("SELECT data FROM profiles WHERE id = ?").get(id),
   );
 }
 
-export function createSession(profile, requestedId) {
+export function listProfiles() {
+  return db
+    .prepare(
+      `
+      SELECT id, name, mode, data, created_at AS createdAt, updated_at AS updatedAt
+      FROM profiles
+      ORDER BY updated_at DESC
+    `,
+    )
+    .all()
+    .map((profile) => ({
+      id: profile.id,
+      name: profile.name,
+      mode: profile.mode,
+      profile: JSON.parse(profile.data),
+      createdAt: profile.createdAt,
+      updatedAt: profile.updatedAt,
+    }));
+}
+
+export function deleteProfile(id) {
+  const usedBySession = db
+    .prepare("SELECT 1 FROM sessions WHERE profile_id = ? LIMIT 1")
+    .get(id);
+  if (usedBySession) return false;
+  return db.prepare("DELETE FROM profiles WHERE id = ?").run(id).changes > 0;
+}
+
+export function createSession(profile, profileId, requestedId) {
   const id = requestedId || randomUUID();
   const timestamp = now();
-  const profileId = saveProfile(profile);
+  const savedProfileId = profileId || saveProfile(profile);
   db.prepare(
     `
     INSERT INTO sessions
@@ -94,7 +126,7 @@ export function createSession(profile, requestedId) {
   `,
   ).run(
     id,
-    profileId,
+    savedProfileId,
     JSON.stringify(profile),
     "Nouvelle conversation",
     timestamp,

@@ -22,7 +22,12 @@ export function useChat() {
     }
   });
 
-  async function send(text: string, length: Length, profile: Profile) {
+  async function send(
+    text: string,
+    length: Length,
+    profile: Profile,
+    profileId: string,
+  ) {
     text = text.trim();
     if (!text || loading.value) return;
 
@@ -38,7 +43,13 @@ export function useChat() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, message: text, length, profile }),
+        body: JSON.stringify({
+          sessionId,
+          message: text,
+          length,
+          profileId,
+          profile,
+        }),
         signal: controller.signal,
       });
 

@@ -4,7 +4,7 @@ import ChatPage from "./components/ChatPage.vue";
 import ProfilePage from "./components/ProfilePage.vue";
 import { useChat } from "./composables/useChat";
 import { defaultProfile } from "./profile";
-import type { Profile } from "./types";
+import type { Profile, SavedProfile } from "./types";
 
 type Page = "chat" | "profile";
 
@@ -12,36 +12,105 @@ const { messages, loading, send, stop, reset } = useChat();
 const page = ref<Page>("chat");
 const model = ref("");
 const profile = ref<Profile>({ ...defaultProfile });
+const profiles = ref<SavedProfile[]>([]);
+const profileId = ref("");
 const profileLoaded = ref(false);
 
 watch(
     profile,
     (value) => {
         if (profileLoaded.value) {
-            void fetch("/api/profile", {
+            if (!profileId.value) return;
+            void fetch(`/api/profiles/${profileId.value}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(value),
             });
+            const index = profiles.value.findIndex((item) => item.id === profileId.value);
+            if (index >= 0) {
+                profiles.value[index] = {
+                    ...profiles.value[index],
+                    name: value.name,
+                    mode: value.mode,
+                    profile: { ...value },
+                    updatedAt: new Date().toISOString(),
+                };
+            }
         }
     },
     { deep: true },
 );
 
 function ask(text: string) {
-    send(text, profile.value.length, { ...profile.value });
+    send(text, profile.value.length, { ...profile.value }, profileId.value);
     page.value = "chat";
+}
+
+function selectProfile(id: string) {
+    const saved = profiles.value.find((item) => item.id === id);
+    if (!saved || saved.id === profileId.value) return;
+    reset();
+    profileId.value = saved.id;
+    profile.value = { ...saved.profile };
+}
+
+async function createProfile() {
+    const newProfile: Profile = {
+        ...defaultProfile,
+        mode: "rp",
+        name: "Nouveau profil RP",
+        rpCharacter: "",
+        rpScene: "",
+        rpRelationship: "",
+        rpRules: "",
+    };
+    const res = await fetch("/api/profiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProfile),
+    });
+    if (!res.ok) return;
+    const saved = (await res.json()) as { id: string; profile: Profile };
+    profiles.value.unshift({
+        id: saved.id,
+        name: saved.profile.name,
+        mode: saved.profile.mode,
+        profile: saved.profile,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    });
+    reset();
+    profileId.value = saved.id;
+    profile.value = { ...saved.profile };
+}
+
+async function removeProfile(id: string) {
+    if (profiles.value.length <= 1) return;
+    const res = await fetch(`/api/profiles/${id}`, { method: "DELETE" });
+    if (!res.ok) return;
+    profiles.value = profiles.value.filter((item) => item.id !== id);
+    if (id === profileId.value) {
+        const next = profiles.value[0];
+        profileId.value = next.id;
+        profile.value = { ...next.profile };
+        reset();
+    }
 }
 
 onMounted(async () => {
     try {
-        const [configRes, profileRes] = await Promise.all([
+        const [configRes, profilesRes] = await Promise.all([
             fetch("/api/config"),
-            fetch("/api/profile"),
+            fetch("/api/profiles"),
         ]);
         model.value = (await configRes.json()).model;
-        const savedProfile = await profileRes.json();
-        if (savedProfile) profile.value = savedProfile;
+        profiles.value = (await profilesRes.json()) as SavedProfile[];
+        if (!profiles.value.length) await createProfile();
+        else {
+            const saved = profiles.value[0];
+            profileId.value = saved.id;
+            profile.value = { ...saved.profile };
+        }
     } catch {
         // Serveur éteint : le modèle reste masqué.
     } finally {
@@ -68,7 +137,9 @@ onMounted(async () => {
         <div class="workspace">
             <ChatPage v-if="page === 'chat'" v-model:profile="profile" :messages="messages" :loading="loading"
                 @send="ask" @stop="stop" @reset="reset" />
-            <ProfilePage v-else v-model="profile" :loading="loading" />
+            <ProfilePage v-else v-model="profile" :loading="loading" :profiles="profiles"
+                :profile-id="profileId" @select-profile="selectProfile" @new-profile="createProfile"
+                @delete-profile="removeProfile" />
         </div>
     </div>
 </template>
