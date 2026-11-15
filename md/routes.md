@@ -14,6 +14,16 @@ Retourne le modèle Ollama configuré.
 }
 ```
 
+### `GET /api/models`
+
+Retourne les modèles installés dans Ollama. Cette route relaie une erreur `502` si Ollama est indisponible.
+
+```json
+{
+  "models": ["gemma4:e4b", "llama3.2:3b"]
+}
+```
+
 ## Profils
 
 ### `GET /api/profile`
@@ -89,13 +99,14 @@ Réponse : `204`.
 
 ### `POST /api/chat`
 
-Envoie un historique de messages, une longueur de réponse et un profil au serveur. La réponse est un flux NDJSON contenant des événements `token`, `done` ou `error`.
+Envoie un message, le modèle choisi, une longueur de réponse et un profil au serveur. La réponse est un flux NDJSON contenant des événements `token`, `done` ou `error`.
 
 ```json
 {
   "messages": [
     { "role": "user", "content": "Bonjour" }
   ],
+  "model": "gemma4:e4b",
   "length": "normal",
   "profile": {}
 }

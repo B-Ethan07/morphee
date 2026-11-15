@@ -50,6 +50,7 @@ export function useChat() {
     length: Length,
     profile: Profile,
     profileId: string,
+    model: string,
   ) {
     text = text.trim();
     if (!text || loading.value) return;
@@ -73,6 +74,7 @@ export function useChat() {
           length,
           profileId,
           profile,
+          model,
         }),
         signal: controller.signal,
       });

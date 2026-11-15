@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { MODEL } from "./config.js";
+import { MODEL, OLLAMA_URL } from "./config.js";
 import { chatController } from "./controllers/chatController.js";
 import {
   deleteProfile,
@@ -17,6 +17,28 @@ import {
 const router = Router();
 
 router.get("/config", (_req, res) => res.json({ model: MODEL }));
+router.get("/models", async (_req, res) => {
+  try {
+    const response = await fetch(`${OLLAMA_URL}/api/tags`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      return res.status(502).json({ error: `Ollama a répondu : ${errorText}` });
+    }
+    const data = await response.json();
+    const models = Array.isArray(data.models)
+      ? data.models
+          .map((model) => (typeof model?.name === "string" ? model.name : ""))
+          .filter(Boolean)
+      : [];
+    return res.json({ models });
+  } catch (error) {
+    const message =
+      error.cause?.code === "ECONNREFUSED"
+        ? "Ollama n'est pas lancé (http://localhost:11434)."
+        : error.message;
+    return res.status(502).json({ error: message });
+  }
+});
 router.get("/profile", (_req, res) => res.json(getProfile()));
 router.get("/profiles", (_req, res) => res.json(listProfiles()));
 router.post("/profiles", (req, res) => {

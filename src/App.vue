@@ -12,6 +12,7 @@ type Page = "chat" | "profile" | "history";
 const { messages, loading, currentSessionId, send, stop, reset, loadSession } = useChat();
 const page = ref<Page>("chat");
 const model = ref("");
+const models = ref<string[]>([]);
 const profile = ref<Profile>({ ...defaultProfile });
 const profiles = ref<SavedProfile[]>([]);
 const sessions = ref<SessionSummary[]>([]);
@@ -44,7 +45,7 @@ watch(
 );
 
 async function ask(text: string) {
-    await send(text, profile.value.length, { ...profile.value }, profileId.value);
+    await send(text, profile.value.length, { ...profile.value }, profileId.value, model.value);
     await refreshSessions();
     page.value = "chat";
 }
@@ -74,6 +75,10 @@ function selectProfile(id: string) {
     reset();
     profileId.value = saved.id;
     profile.value = { ...saved.profile };
+}
+
+function selectModel(value: string) {
+    if (value) model.value = value;
 }
 
 async function saveProfile() {
@@ -130,11 +135,18 @@ async function removeProfile(id: string) {
 
 onMounted(async () => {
     try {
-        const [configRes, profilesRes] = await Promise.all([
+        const [configRes, modelsRes, profilesRes] = await Promise.all([
             fetch("/api/config"),
+            fetch("/api/models"),
             fetch("/api/profiles"),
         ]);
-        model.value = (await configRes.json()).model;
+        const config = (await configRes.json()) as { model: string };
+        model.value = config.model;
+        if (modelsRes.ok) {
+            const data = (await modelsRes.json()) as { models?: string[] };
+            models.value = data.models ?? [];
+        }
+        if (!models.value.includes(model.value)) models.value.unshift(model.value);
         profiles.value = (await profilesRes.json()) as SavedProfile[];
         if (!profiles.value.length) await createProfile();
         else {
@@ -144,7 +156,7 @@ onMounted(async () => {
         }
         await refreshSessions();
     } catch {
-        // Serveur éteint : le modèle reste masqué.
+        // Serveur éteint : l'interface reste utilisable pour les profils locaux.
     } finally {
         profileLoaded.value = true;
     }
@@ -170,8 +182,8 @@ onMounted(async () => {
 
         <div class="workspace">
             <ChatPage v-if="page === 'chat'" v-model:profile="profile" :messages="messages" :loading="loading"
-                :profiles="profiles" :profile-id="profileId" @send="ask" @stop="stop" @reset="reset"
-                @select-profile="selectProfile" />
+                :profiles="profiles" :profile-id="profileId" :models="models" :model="model" @send="ask"
+                @stop="stop" @reset="reset" @select-profile="selectProfile" @select-model="selectModel" />
             <HistoryPage v-else-if="page === 'history'" :sessions="sessions" :current-session-id="currentSessionId"
                 @open="openSession" @delete="removeSession" />
             <ProfilePage v-else v-model="profile" :loading="loading" :profiles="profiles" :profile-id="profileId"

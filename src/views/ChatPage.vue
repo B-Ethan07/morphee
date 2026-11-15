@@ -9,12 +9,15 @@ const props = defineProps<{
     loading: boolean;
     profiles: SavedProfile[];
     profileId: string;
+    models: string[];
+    model: string;
 }>();
 const emit = defineEmits<{
     send: [text: string];
     stop: [];
     reset: [];
     "select-profile": [id: string];
+    "select-model": [model: string];
 }>();
 const profile = defineModel<Profile>("profile", { required: true });
 
@@ -75,8 +78,9 @@ onMounted(() => {
         </main>
 
         <ChatInput v-model:length="profile.length" :loading="loading" :profiles="props.profiles"
-            :profile-id="props.profileId" @send="ask" @stop="emit('stop')"
-            @select-profile="emit('select-profile', $event)" />
+            :profile-id="props.profileId" :models="props.models" :model="props.model" @send="ask"
+            @stop="emit('stop')" @select-profile="emit('select-profile', $event)"
+            @select-model="emit('select-model', $event)" />
     </div>
 </template>
 

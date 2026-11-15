@@ -17,6 +17,7 @@ export async function chatController(req, res) {
     sessionId: requestedSessionId,
     profileId,
     message,
+    model = MODEL,
     length = "normal",
     profile = {},
   } = req.body ?? {};
@@ -49,7 +50,7 @@ export async function chatController(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: MODEL,
+        model: typeof model === "string" && model.trim() ? model.trim() : MODEL,
         messages: [{ role: "system", content: systemMessage }, ...history],
         stream: true,
         think,

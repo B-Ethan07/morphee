@@ -63,7 +63,7 @@ Les fichiers `.env` sont ignorés par Git. Le serveur utilise directement les va
 
 La barre latérale donne accès à deux pages :
 
-- **Conversation** : historique persistant, réponses en streaming, arrêt de génération, copie du Markdown et continuation des réponses tronquées.
+- **Conversation** : historique persistant, réponses en streaming, arrêt de génération, copie du Markdown et continuation des réponses tronquées. La barre de saisie liste les modèles Ollama installés et permet de choisir celui utilisé pour le prochain message.
 - **Profil du LLM** : configuration persistante du profil actif.
 
 Les modes disponibles sont :

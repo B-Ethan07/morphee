@@ -6,11 +6,14 @@ const props = defineProps<{
     loading: boolean;
     profiles: SavedProfile[];
     profileId: string;
+    models: string[];
+    model: string;
 }>();
 const emit = defineEmits<{
     send: [text: string];
     stop: [];
     "select-profile": [id: string];
+    "select-model": [model: string];
 }>();
 const length = defineModel<Length>("length", { required: true });
 
@@ -58,6 +61,13 @@ watch(
                     @change="emit('select-profile', ($event.target as HTMLSelectElement).value)">
                     <option v-for="profile in props.profiles" :key="profile.id" :value="profile.id">
                         {{ profile.name }}
+                    </option>
+                </select></label>
+
+            <label v-if="props.models.length" class="profile-select">Modèle : <select :value="props.model"
+                    @change="emit('select-model', ($event.target as HTMLSelectElement).value)">
+                    <option v-for="availableModel in props.models" :key="availableModel" :value="availableModel">
+                        {{ availableModel }}
                     </option>
                 </select></label>
 
