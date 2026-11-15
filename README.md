@@ -88,56 +88,10 @@ Le profil permet notamment de régler :
 
 Les documents et exemples sont délimités dans le prompt et présentés comme des références, pas comme des instructions système.
 
-## API
+## Documentation technique
 
-### `GET /api/config`
-
-Retourne le modèle configuré :
-
-```json
-{
-  "model": "gemma4:e4b"
-}
-```
-
-### `POST /api/chat`
-
-Accepte un historique de messages et un profil. La réponse est un flux NDJSON contenant des événements `token`, `done` ou `error`.
-
-```json
-{
-  "messages": [
-    { "role": "user", "content": "Bonjour" }
-  ],
-  "length": "normal",
-  "profile": {}
-}
-```
-
-Le serveur filtre l'historique, limite les champs du profil et borne les paramètres techniques avant de les transmettre à Ollama.
-
-## Architecture
-
-```text
-src/
-  App.vue                         Shell et navigation
-  profile.ts                      Valeurs par défaut et migration du profil
-  components/
-    ChatPage.vue                  Page conversation
-    ProfilePage.vue               Page configuration du profil
-    ChatInput.vue                 Saisie et longueur de réponse
-    ChatMessage.vue               Affichage Markdown des messages
-  composables/
-    useChat.ts                    Historique et streaming
-
-server.js                         Entrée Express
-server/
-  config.js                       Configuration et constantes
-  routes.js                       Routes API
-  controllers/chatController.js   Streaming vers Ollama
-  services/promptBuilder.js       Validation et construction du prompt
-  middleware/http.js              JSON, erreurs et routes inconnues
-```
+- [Architecture](md/architecture.md) : organisation du frontend, du serveur et flux principal.
+- [Routes HTTP](md/routes.md) : détail des endpoints `/api`, des corps JSON et des réponses.
 
 ## Vérification
 

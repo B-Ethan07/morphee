@@ -95,7 +95,8 @@ header {
     align-items: center;
     gap: 16px;
     padding: 18px 20px;
-    border-bottom: 1px solid var(--panel);
+    border-bottom: 1px solid rgba(69, 59, 114, .55);
+    background: rgba(11, 11, 26, .3);
 }
 
 .conversation-title {
@@ -147,6 +148,7 @@ main {
 .empty h1 {
     margin: 0 0 5px;
     font-size: 1.5rem;
+    letter-spacing: -.03em;
 }
 
 .empty p {

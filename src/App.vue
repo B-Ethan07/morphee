@@ -194,7 +194,7 @@ onMounted(async () => {
     flex-direction: column;
     padding: 22px 14px;
     border-right: 1px solid var(--border);
-    background: var(--panel);
+    background: linear-gradient(180deg, rgba(26, 22, 53, .96), rgba(11, 11, 26, .92));
 }
 
 .brand {
@@ -212,6 +212,7 @@ onMounted(async () => {
     border-radius: 9px;
     background: var(--accent);
     color: #fff;
+    box-shadow: 0 0 22px rgba(124, 58, 237, .45);
 }
 
 .brand strong,
@@ -255,6 +256,10 @@ nav button.active {
     color: var(--text);
 }
 
+nav button.active {
+    box-shadow: inset 3px 0 0 var(--accent-soft);
+}
+
 nav button.active span {
     color: var(--accent);
 }
@@ -280,6 +285,7 @@ nav button.active span {
     min-width: 0;
     flex: 1;
     height: 100%;
+    background: rgba(11, 11, 26, .52);
 }
 
 @media (max-width: 650px) {

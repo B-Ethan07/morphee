@@ -80,6 +80,7 @@ async function copyAll() {
 .user .avatar {
     background: var(--accent);
     color: #fff;
+    box-shadow: 0 5px 16px rgba(124, 58, 237, .28);
 }
 
 .content {
@@ -103,6 +104,7 @@ async function copyAll() {
     background: var(--accent);
     color: #fff;
     border-bottom-right-radius: 4px;
+    box-shadow: 0 8px 22px rgba(124, 58, 237, .18);
 }
 
 .assistant .bubble {
@@ -277,7 +279,7 @@ async function copyAll() {
     position: relative;
     margin: 0.8em 0;
     padding: 14px;
-    background: #0b0f14;
+    background: #0B0B1A;
     border: 1px solid var(--border);
     border-radius: 10px;
     overflow-x: auto;

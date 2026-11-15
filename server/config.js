@@ -4,8 +4,8 @@ export const MODEL = process.env.MODEL ?? "gemma4:e4b";
 
 export const LENGTHS = {
   minimal: {
-    num_predict: 80,
-    hint: "Réponds en une seule phrase, avec 20 mots maximum.",
+    num_predict: 100,
+    hint: "Réponds avec 100 mots maximum. 2 phrase maximum.",
   },
   short: { num_predict: 250, hint: "Réponds en 3 à 5 phrases maximum." },
   normal: {
