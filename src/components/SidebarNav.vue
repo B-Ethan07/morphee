@@ -1,0 +1,68 @@
+<script setup lang="ts">
+import { faMessage, faSliders } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import type { Page } from "../navigation";
+
+defineProps<{ page: Page }>();
+
+const emit = defineEmits<{ navigate: [page: Page] }>();
+
+const items = [
+    { page: "chat", label: "Conversation", icon: faMessage },
+    { page: "profile", label: "Profil du LLM", icon: faSliders },
+] as const;
+</script>
+
+<template>
+    <nav aria-label="Navigation principale">
+        <button v-for="item in items" :key="item.page" type="button" :title="item.label"
+            :class="{ active: page === item.page }" @click="emit('navigate', item.page)">
+            <FontAwesomeIcon :icon="item.icon" fixed-width class="nav-icon" />
+            <span class="label">{{ item.label }}</span>
+        </button>
+    </nav>
+</template>
+
+<style scoped>
+nav {
+    display: grid;
+    gap: 4px;
+}
+
+button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    text-align: left;
+}
+
+button:hover,
+button.active {
+    background: var(--panel-2);
+    color: var(--text);
+}
+
+button.active {
+    box-shadow: inset 3px 0 0 var(--accent-soft);
+}
+
+button.active .nav-icon {
+    color: var(--accent);
+}
+
+@media (max-width: 650px) {
+    button {
+        justify-content: center;
+        padding: 10px 4px;
+    }
+
+    .label {
+        display: none;
+    }
+}
+</style>

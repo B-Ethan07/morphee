@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { faClockRotateLeft, faMessage, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import type { SessionSummary } from "../types";
 
 defineProps<{
@@ -30,6 +32,7 @@ function formatDate(value: string) {
         </header>
 
         <div v-if="!sessions.length" class="empty-history">
+            <FontAwesomeIcon :icon="faClockRotateLeft" size="2x" class="empty-icon" />
             <h3>Aucune conversation enregistrée</h3>
             <p>Votre prochaine conversation apparaîtra ici.</p>
         </div>
@@ -37,12 +40,15 @@ function formatDate(value: string) {
         <div v-else class="session-list">
             <article v-for="session in sessions" :key="session.id"
                 :class="['session-item', { active: session.id === currentSessionId }]">
+                <FontAwesomeIcon :icon="faMessage" fixed-width class="session-icon" />
                 <button class="session-open" type="button" @click="emit('open', session.id)">
                     <strong>{{ session.title }}</strong>
                     <small>Profil : {{ session.profileName }} · {{ formatDate(session.updatedAt) }}</small>
                 </button>
                 <button class="session-delete" type="button" title="Supprimer la conversation"
-                    @click="emit('delete', session.id)">Supprimer</button>
+                    :aria-label="`Supprimer « ${session.title} »`" @click="emit('delete', session.id)">
+                    <FontAwesomeIcon :icon="faTrash" />
+                </button>
             </article>
         </div>
     </section>
@@ -91,6 +97,11 @@ h3 {
     text-align: center;
 }
 
+.empty-icon {
+    margin-bottom: 12px;
+    color: var(--muted);
+}
+
 .session-list {
     display: grid;
     gap: 10px;
@@ -108,6 +119,15 @@ h3 {
 
 .session-item.active {
     border-color: var(--accent);
+}
+
+.session-icon {
+    flex: none;
+    color: var(--muted);
+}
+
+.session-item.active .session-icon {
+    color: var(--accent);
 }
 
 .session-open {
@@ -134,7 +154,9 @@ h3 {
 
 .session-delete {
     flex: none;
-    padding: 7px 10px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
     border: 1px solid var(--border);
     border-radius: 7px;
     background: transparent;
@@ -149,15 +171,6 @@ h3 {
 @media (max-width: 600px) {
     .history-page {
         padding: 20px 14px 36px;
-    }
-
-    .session-item {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .session-delete {
-        align-self: flex-start;
     }
 }
 </style>
