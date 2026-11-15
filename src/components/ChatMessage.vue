@@ -79,7 +79,7 @@ async function copyAll() {
 
 .user .avatar {
     background: var(--accent);
-    color: #fff;
+    color: #0b0b1a;
     box-shadow: 0 5px 16px rgba(124, 58, 237, .28);
 }
 
@@ -102,7 +102,7 @@ async function copyAll() {
 
 .user .bubble {
     background: var(--accent);
-    color: #fff;
+    color: #0b0b1a;
     border-bottom-right-radius: 4px;
     box-shadow: 0 8px 22px rgba(124, 58, 237, .18);
 }

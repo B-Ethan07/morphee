@@ -93,8 +93,8 @@ header {
     align-items: center;
     gap: 16px;
     padding: 14px 20px;
-    border-bottom: 1px solid rgba(69, 59, 114, .55);
-    background: rgba(11, 11, 26, .3);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
 }
 
 .conversation-title {

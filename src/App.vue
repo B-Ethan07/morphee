@@ -92,6 +92,6 @@ onMounted(async () => {
     min-width: 0;
     flex: 1;
     height: 100%;
-    background: rgba(11, 11, 26, .52);
+    background: var(--bg);
 }
 </style>

@@ -1,14 +1,30 @@
 :root {
   color-scheme: dark;
-  --bg: #0B0B1A;
-  --panel: #1A1635;
-  --panel-2: #2D2456;
-  --border: #453b72;
-  --text: #f5f2ff;
-  --muted: #C4B5FD;
-  --accent: #7C3AED;
-  --accent-soft: #a78bfa;
-  --danger: #64234d;
+
+  /* Fonds : l'indigo de l'icône (#1e1b4b) et ses variantes plus sombres */
+  --bg: #0b0a1e;
+  --panel: #151435;
+  --panel-2: #1e1b4b;
+  --border: #2f2c66;
+
+  /* Texte : blanc légèrement lavande, gris-indigo pour le secondaire */
+  --text: #eef0ff;
+  --muted: #8f98c9;
+
+  /* Accent : le bleu-lavande du bot (#c7d2fe) et des M (#a5b4fc) */
+  --accent: #a5b4fc;
+  --accent-soft: #c7d2fe;
+  --accent-bg: rgba(165, 180, 252, .16);
+
+  /* Jaune : l'antenne du bot (#fbbf24) */
+  --highlight: #fbbf24;
+  --highlight-bg: rgba(251, 191, 36, .14);
+
+  /* États */
+  --ok: #6bd49a;
+  --warn: #fbbf24;
+  --error: #ff9a9a;
+  --danger: #5c2b3f;
 }
 
 * { box-sizing: border-box; }
@@ -17,10 +33,7 @@ html, body, #app { height: 100%; }
 body {
   margin: 0;
   font: 15px/1.6 "Avenir Next", "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at 82% 0%, rgba(124, 58, 237, .18), transparent 30%),
-    radial-gradient(circle at 15% 100%, rgba(45, 36, 86, .4), transparent 32%),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
 }
 
@@ -29,15 +42,15 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 button:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
-input:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+input:focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
 
-.btn { padding: 9px 16px; background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(124, 58, 237, .22); }
-.btn:hover:not(:disabled) { background: #8B5CF6; transform: translateY(-1px); }
-.btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 7px 12px; }
-.btn.ghost:hover:not(:disabled) { color: var(--text); border-color: var(--muted); }
-.btn.stop { background: var(--panel-2); color: var(--text); }
+.btn { padding: 9px 16px; background: var(--accent); color: var(--bg); font-weight: 600; }
+.btn:hover:not(:disabled) { background: var(--accent-soft); transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 7px 12px; font-weight: 400; }
+.btn.ghost:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+.btn.stop { background: var(--panel-2); color: var(--text); font-weight: 400; }
 
-::selection { background: var(--accent); color: #fff; }
+::selection { background: rgba(251, 191, 36, .35); color: var(--text); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

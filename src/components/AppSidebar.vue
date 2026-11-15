@@ -24,7 +24,7 @@ const emit = defineEmits<{
 <template>
     <aside class="sidebar">
         <div class="brand">
-            <img class="brand-mark" src="/morphee-icon.svg" alt="" />
+            <img class="brand-mark" src="/morphee-logo.svg" alt="" width="15" height="15" />
             <strong>Morphée</strong>
         </div>
 
@@ -54,7 +54,7 @@ const emit = defineEmits<{
     width: 240px;
     padding: 16px 12px;
     border-right: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(26, 22, 53, .96), rgba(11, 11, 26, .92));
+    background: linear-gradient(180deg, var(--panel), var(--bg));
 }
 
 .brand {
@@ -65,9 +65,8 @@ const emit = defineEmits<{
 }
 
 .brand-mark {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
+    width: 25px;
+    height: 25px;
 }
 
 .brand strong {
@@ -112,7 +111,7 @@ const emit = defineEmits<{
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #64c27b;
+    background: #fbbf24;
 }
 
 @media (max-width: 650px) {

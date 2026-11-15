@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="76 151 280 280" width="256" height="256">
+  <title>Morphée</title>
+  <line x1="216" y1="226" x2="216" y2="186" stroke="#c7d2fe" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="216" cy="172" r="15" fill="#fbbf24"/>
+  <rect x="96" y="226" width="240" height="200" rx="60" fill="#c7d2fe"/>
+  <path d="M138 318 Q166 346 194 318" fill="none" stroke="#1e1b4b" stroke-width="14" stroke-linecap="round"/>
+  <path d="M238 318 Q266 346 294 318" fill="none" stroke="#1e1b4b" stroke-width="14" stroke-linecap="round"/>
+  <path d="M198 378 Q216 388 234 378" fill="none" stroke="#1e1b4b" stroke-width="10" stroke-linecap="round"/>
+</svg>

@@ -48,7 +48,7 @@ button.active {
 }
 
 button.active .nav-icon {
-    color: var(--accent);
+    color: var(--text);
 }
 
 @media (max-width: 650px) {
