@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import AppSidebar from "./components/AppSidebar.vue";
 import ChatPage from "./views/ChatPage.vue";
 import HistoryPage from "./views/HistoryPage.vue";
@@ -26,6 +26,10 @@ const {
 } = useProfiles(reset);
 
 const page = ref<Page>("chat");
+const conversationTitle = computed(() =>
+    sessions.value.find((session) => session.id === currentSessionId.value)?.title
+    ?? "Nouvelle conversation",
+);
 
 async function ask(text: string) {
     await send(text, profile.value.length, { ...profile.value }, profileId.value, model.value);
@@ -66,8 +70,9 @@ onMounted(async () => {
 
         <div class="workspace">
             <ChatPage v-if="page === 'chat'" v-model:profile="profile" :messages="messages" :loading="loading"
-                :profiles="profiles" :profile-id="profileId" :models="models" :model="model" @send="ask"
-                @stop="stop" @reset="reset" @select-profile="selectProfile" @select-model="selectModel" />
+                :profiles="profiles" :profile-id="profileId" :models="models" :model="model"
+                :conversation-title="conversationTitle" @send="ask" @stop="stop" @reset="reset"
+                @select-profile="selectProfile" @select-model="selectModel" />
             <HistoryPage v-else-if="page === 'history'" :sessions="sessions" :current-session-id="currentSessionId"
                 @open="openSession" @delete="removeSession" />
             <ProfilePage v-else v-model="profile" :loading="loading" :profiles="profiles" :profile-id="profileId"

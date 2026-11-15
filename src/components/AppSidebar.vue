@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { faMoon, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import RecentSessions from "./RecentSessions.vue";
 import SidebarNav from "./SidebarNav.vue";
@@ -24,8 +24,8 @@ const emit = defineEmits<{
 <template>
     <aside class="sidebar">
         <div class="brand">
-            <span class="brand-mark"><FontAwesomeIcon :icon="faMoon" /></span>
-            <div><strong>Morphée</strong><small>Atelier LLM</small></div>
+            <img class="brand-mark" src="/morphee-icon.svg" alt="" />
+            <strong>Morphée</strong>
         </div>
 
         <button class="new-chat" type="button" title="Nouvelle conversation" @click="emit('new-chat')">
@@ -52,7 +52,7 @@ const emit = defineEmits<{
     flex: none;
     flex-direction: column;
     width: 240px;
-    padding: 22px 14px;
+    padding: 16px 12px;
     border-right: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(26, 22, 53, .96), rgba(11, 11, 26, .92));
 }
@@ -61,43 +61,27 @@ const emit = defineEmits<{
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 0 8px 22px;
+    padding: 0 6px 16px;
 }
 
 .brand-mark {
-    display: grid;
-    width: 30px;
-    height: 30px;
-    place-items: center;
-    border-radius: 9px;
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 0 22px rgba(124, 58, 237, .45);
-}
-
-.brand strong,
-.brand small {
-    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
 }
 
 .brand strong {
-    font-size: 14px;
-}
-
-.brand small {
-    color: var(--muted);
-    font-size: 11px;
+    font-size: 13px;
 }
 
 .new-chat {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--panel-2);
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    background: transparent;
     color: var(--text);
     text-align: left;
 }
@@ -142,7 +126,6 @@ const emit = defineEmits<{
         padding: 0 0 18px;
     }
 
-    .brand>div,
     .new-chat .label,
     .model-name {
         display: none;

@@ -9,7 +9,7 @@ const emit = defineEmits<{ navigate: [page: Page] }>();
 
 const items = [
     { page: "chat", label: "Conversation", icon: faMessage },
-    { page: "profile", label: "Profil du LLM", icon: faSliders },
+    { page: "profile", label: "Profil LLM", icon: faSliders },
 ] as const;
 </script>
 
@@ -26,16 +26,16 @@ const items = [
 <style scoped>
 nav {
     display: grid;
-    gap: 4px;
+    gap: 2px;
 }
 
 button {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
+    gap: 8px;
+    padding: 7px 8px;
     border: 0;
-    border-radius: 10px;
+    border-radius: 7px;
     background: transparent;
     color: var(--muted);
     text-align: left;
@@ -45,10 +45,6 @@ button:hover,
 button.active {
     background: var(--panel-2);
     color: var(--text);
-}
-
-button.active {
-    box-shadow: inset 3px 0 0 var(--accent-soft);
 }
 
 button.active .nav-icon {

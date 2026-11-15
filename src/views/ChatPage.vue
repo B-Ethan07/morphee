@@ -11,6 +11,7 @@ const props = defineProps<{
     profileId: string;
     models: string[];
     model: string;
+    conversationTitle: string;
 }>();
 const emit = defineEmits<{
     send: [text: string];
@@ -56,14 +57,8 @@ onMounted(() => {
     <div class="chat-page">
         <header>
             <div class="conversation-title">
-                <div>
-                    <p class="eyebrow">Conversation</p>
-                    <h2>{{ profile.name }}</h2>
-                </div>
-                <span class="badge">{{ profile.mode }}</span>
+                <h2>{{ props.conversationTitle }}</h2>
             </div>
-            <button class="btn ghost" :disabled="loading || !messages.length" @click="emit('reset')">Nouvelle
-                conversation</button>
         </header>
 
         <main ref="list" @scroll="onScroll">
@@ -95,27 +90,15 @@ onMounted(() => {
 
 header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 16px;
-    padding: 18px 20px;
+    padding: 14px 20px;
     border-bottom: 1px solid rgba(69, 59, 114, .55);
     background: rgba(11, 11, 26, .3);
 }
 
 .conversation-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     min-width: 0;
-}
-
-.eyebrow {
-    margin: 0;
-    color: var(--accent);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .08em;
 }
 
 h2 {
@@ -123,15 +106,9 @@ h2 {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 1.05rem;
-}
-
-.badge {
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: var(--panel-2);
     color: var(--muted);
-    font-size: 12px;
+    font-size: .9rem;
+    font-weight: 500;
 }
 
 main {
@@ -180,7 +157,6 @@ main {
 
 @media (max-width: 600px) {
     header {
-        align-items: flex-start;
         padding: 14px;
     }
 
@@ -188,9 +164,5 @@ main {
         padding: 20px 14px;
     }
 
-    header .btn {
-        padding: 7px 9px;
-        font-size: 12px;
-    }
 }
 </style>
