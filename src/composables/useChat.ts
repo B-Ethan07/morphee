@@ -122,11 +122,6 @@ export function useChat() {
   const stop = () => controller?.abort();
 
   function reset() {
-    if (currentSessionId.value) {
-      void fetch(`/api/sessions/${currentSessionId.value}`, {
-        method: "DELETE",
-      });
-    }
     sessionId = crypto.randomUUID();
     currentSessionId.value = null;
     messages.value = [];
