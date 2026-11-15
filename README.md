@@ -66,12 +66,6 @@ La barre latérale donne accès à deux pages :
 - **Conversation** : historique persistant, réponses en streaming, arrêt de génération, copie du Markdown et continuation des réponses tronquées. La barre de saisie liste les modèles Ollama installés et permet de choisir celui utilisé pour le prochain message.
 - **Profil du LLM** : configuration persistante du profil actif.
 
-Les modes disponibles sont :
-
-- **Jeu de rôle** : personnage, scène, relation avec l'utilisateur et règles d'incarnation.
-- **Développement** : stack technique, style de code et conventions du projet.
-- **Questions** : style pédagogique, exemples et analogies.
-
 Le profil est sauvegardé localement dans le navigateur. Il est envoyé avec chaque nouveau message et n'est pas ajouté à l'historique visible de la conversation.
 
 ## Paramètres du profil
