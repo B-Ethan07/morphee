@@ -2,6 +2,8 @@
 
 Morphée est un chatbot local avec Vue 3, Vite, Express et Ollama. L'application permet de discuter avec un modèle local et de configurer un profil de réponse détaillé : rôle, mode, ton, format, langue, garde-fous, exemples, documents de référence et paramètres de génération.
 
+Il s'agit d'un projet personnel réalisé dans un but d'apprentissage.
+
 ## Prérequis
 
 - Node.js 20 ou plus récent
@@ -134,3 +136,7 @@ Les données SQLite de l'application desktop sont stockées dans le dossier util
 ollama serve
 ollama pull gemma4:e4b
 ```
+
+## Licence
+
+Ce projet est distribué sous licence [ISC](https://opensource.org/license/isc).
