@@ -2,12 +2,15 @@
   "name": "chatbot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "electron/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "server": "node --watch server.js"
+    "server": "node --watch server.js",
+    "desktop:dev": "concurrently -k \"npm run dev\" \"wait-on http://localhost:5173 && cross-env ELECTRON_DEV_SERVER_URL=http://localhost:5173 electron electron/main.js\"",
+    "desktop": "npm run build && electron electron/main.js",
+    "desktop:build": "npm run build && electron-builder"
   },
   "keywords": [],
   "author": "",
@@ -24,8 +27,39 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.11",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0",
     "typescript": "^6.0.3",
     "vite": "^8.3.8",
-    "vue-tsc": "^3.3.14"
+    "vue-tsc": "^3.3.14",
+    "wait-on": "^9.0.1"
+  },
+  "build": {
+    "appId": "com.morphee.chatbot",
+    "productName": "Morphee",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "server/**/*",
+      "server.js",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "icon": "public/morphee-icon.ico",
+    "win": {
+      "icon": "public/morphee-icon.ico",
+      "target": "nsis",
+      "artifactName": "Morphee-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }

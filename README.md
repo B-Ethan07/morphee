@@ -39,6 +39,16 @@ Ouvrir ensuite l'URL affichée par Vite, généralement `http://localhost:5173`.
 
 Le serveur de développement Vite redirige automatiquement les appels `/api` vers Express sur le port `3000`.
 
+### Développement de l'application desktop
+
+Pour lancer Vue, Express et Electron avec une seule commande :
+
+```powershell
+npm run desktop:dev
+```
+
+Electron démarre automatiquement le serveur Express. Ollama doit toutefois être installé et lancé séparément.
+
 ## Configuration
 
 Le serveur accepte les variables d'environnement suivantes :
@@ -107,3 +117,20 @@ npm run server
 ```
 
 Express sert alors les fichiers générés depuis `dist/` et expose l'application sur `http://localhost:3000`.
+
+## Application Windows
+
+Générer l'installeur Windows :
+
+```powershell
+npm run desktop:build
+```
+
+L'installeur `Morphee-Setup-1.0.0.exe` est créé dans le dossier `release/`. Il installe une application desktop qui lance automatiquement le serveur Express et ouvre l'interface dans une fenêtre dédiée.
+
+Les données SQLite de l'application desktop sont stockées dans le dossier utilisateur Windows. Ollama et les modèles restent à installer séparément sur le poste :
+
+```powershell
+ollama serve
+ollama pull gemma4:e4b
+```

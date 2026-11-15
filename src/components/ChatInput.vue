@@ -57,43 +57,47 @@ watch(
             @keydown.enter.exact.prevent="submit"></textarea>
 
         <div class="bar">
-            <label class="profile-select">Profil : <select :value="props.profileId"
-                    @change="emit('select-profile', ($event.target as HTMLSelectElement).value)">
-                    <option v-for="profile in props.profiles" :key="profile.id" :value="profile.id">
-                        {{ profile.name }}
-                    </option>
-                </select></label>
+            <div class="settings">
+                <label class="profile-select">Profil : <select :value="props.profileId"
+                        @change="emit('select-profile', ($event.target as HTMLSelectElement).value)">
+                        <option v-for="profile in props.profiles" :key="profile.id" :value="profile.id">
+                            {{ profile.name }}
+                        </option>
+                    </select></label>
 
-            <label v-if="props.models.length" class="profile-select">Modèle : <select :value="props.model"
-                    @change="emit('select-model', ($event.target as HTMLSelectElement).value)">
-                    <option v-for="availableModel in props.models" :key="availableModel" :value="availableModel">
-                        {{ availableModel }}
-                    </option>
-                </select></label>
+                <label v-if="props.models.length" class="profile-select">Modèle : <select :value="props.model"
+                        @change="emit('select-model', ($event.target as HTMLSelectElement).value)">
+                        <option v-for="availableModel in props.models" :key="availableModel" :value="availableModel">
+                            {{ availableModel }}
+                        </option>
+                    </select></label>
 
-            <div class="seg" role="group" aria-label="Longueur des réponses">
-                <span class="label">Réponses :</span>
-                <button v-for="o in options" :key="o.value" type="button" :class="{ active: length === o.value }"
-                    @click="length = o.value">
-                    {{ o.label }}
-                </button>
+                <div class="seg" role="group" aria-label="Longueur des réponses">
+                    <span class="label">Réponses :</span>
+                    <button v-for="o in options" :key="o.value" type="button" :class="{ active: length === o.value }"
+                        @click="length = o.value">
+                        {{ o.label }}
+                    </button>
+                </div>
             </div>
 
             <span class="hint">Entrée pour envoyer · Maj+Entrée : nouvelle ligne</span>
 
-            <button v-if="!loading" class="btn" type="submit" :disabled="!text.trim()">Envoyer</button>
-            <button v-else class="btn stop" type="button" @click="emit('stop')">Stop</button>
+            <div class="actions">
+                <button v-if="!loading" class="btn" type="submit" :disabled="!text.trim()">Envoyer</button>
+                <button v-else class="btn stop" type="button" @click="emit('stop')">Stop</button>
+            </div>
         </div>
     </form>
 </template>
 
 <style scoped>
 .input {
-    margin: 0 16px 16px;
-    padding: 10px 12px;
+    margin: 0 12px 12px;
+    padding: 8px 10px;
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
 }
 
 .input:focus-within {
@@ -116,30 +120,42 @@ textarea:focus-visible {
 }
 
 .bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 12px;
+    margin-top: 6px;
+}
+
+.settings {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 8px;
     flex-wrap: wrap;
+    gap: 6px 10px;
+    min-width: 0;
 }
 
 .seg {
     display: flex;
     align-items: center;
-    gap: 4px;
+    flex-wrap: wrap;
+    gap: 3px;
+    min-width: 0;
 }
 
 .profile-select {
     display: flex;
     align-items: center;
     gap: 5px;
+    min-width: 0;
     color: var(--muted);
     font-size: 12px;
 }
 
 .profile-select select {
-    max-width: 180px;
-    padding: 4px 7px;
+    min-width: 0;
+    max-width: 160px;
+    padding: 3px 6px;
     border: 1px solid var(--border);
     border-radius: 6px;
     background: var(--bg);
@@ -154,10 +170,11 @@ textarea:focus-visible {
 }
 
 .seg button {
-    padding: 4px 10px;
+    padding: 3px 7px;
     font-size: 12px;
     background: transparent;
     color: var(--muted);
+    white-space: nowrap;
 }
 
 .seg button.active {
@@ -166,10 +183,15 @@ textarea:focus-visible {
 }
 
 .hint {
-    flex: 1;
+    grid-column: 1;
     font-size: 12px;
     color: var(--muted);
-    text-align: right;
+    line-height: 1.3;
+}
+
+.actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
 }
 
 @media (max-width: 600px) {
@@ -178,7 +200,8 @@ textarea:focus-visible {
     }
 
     .bar {
-        justify-content: space-between;
+        grid-template-columns: minmax(0, 1fr) auto;
     }
+
 }
 </style>

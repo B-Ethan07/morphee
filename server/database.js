@@ -3,7 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 
-const databasePath = resolve("data/chatbot.db");
+const databasePath = resolve(process.env.DATA_DIR ?? "data", "chatbot.db");
 mkdirSync(dirname(databasePath), { recursive: true });
 
 const db = new Database(databasePath);
