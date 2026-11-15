@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from "vue";
-import ChatInput from "./ChatInput.vue";
-import ChatMessage from "./ChatMessage.vue";
+import ChatInput from "../components/ChatInput.vue";
+import ChatMessage from "../components/ChatMessage.vue";
 import type { Message, Profile, SavedProfile } from "../types";
 
 const props = defineProps<{

@@ -8,12 +8,13 @@ Morphée est organisé en deux parties : une interface Vue 3 servie par Vite et 
 src/
   App.vue                         Shell et navigation
   profile.ts                      Valeurs par défaut et migration du profil
-  components/
+  views/
     ChatPage.vue                  Page conversation
+    HistoryPage.vue               Historique des sessions
     ProfilePage.vue               Page configuration du profil
+  components/
     ChatInput.vue                 Saisie et longueur de réponse
     ChatMessage.vue               Affichage Markdown des messages
-    HistoryPage.vue               Historique des sessions
   composables/
     useChat.ts                    Historique et streaming
   utils/

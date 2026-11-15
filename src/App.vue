@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
-import ChatPage from "./components/ChatPage.vue";
-import HistoryPage from "./components/HistoryPage.vue";
-import ProfilePage from "./components/ProfilePage.vue";
+import ChatPage from "./views/ChatPage.vue";
+import HistoryPage from "./views/HistoryPage.vue";
+import ProfilePage from "./views/ProfilePage.vue";
 import { useChat } from "./composables/useChat";
 import { defaultProfile } from "./profile";
 import type { Profile, SavedProfile, SessionSummary } from "./types";
