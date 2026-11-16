@@ -35,6 +35,8 @@ export async function chatController(req, res) {
     model = MODEL,
     length = "normal",
   } = body;
+  const selectedModel =
+    typeof model === "string" && model.trim() ? model.trim() : MODEL;
   if (typeof message !== "string" || !message.trim()) {
     return res.status(400).json({ error: "Le champ 'message' est requis." });
   }
@@ -81,7 +83,7 @@ export async function chatController(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: typeof model === "string" && model.trim() ? model.trim() : MODEL,
+        model: selectedModel,
         messages: [{ role: "system", content: finalSystemMessage }, ...history],
         stream: true,
         think,
@@ -101,6 +103,9 @@ export async function chatController(req, res) {
     const decoder = new TextDecoder();
     let buffer = "";
     let assistantContent = "";
+    let responseModel = selectedModel;
+    let promptTokens;
+    let completionTokens;
     for await (const chunk of upstream.body) {
       buffer += decoder.decode(chunk, { stream: true });
       const lines = buffer.split("\n");
@@ -109,16 +114,31 @@ export async function chatController(req, res) {
         if (!line.trim()) continue;
         const data = JSON.parse(line);
         if (data.error) throw new Error(data.error);
+        if (typeof data.model === "string") responseModel = data.model;
         if (data.message?.content) {
           assistantContent += data.message.content;
           send({ type: "token", content: data.message.content });
         }
         if (data.done) {
-          send({ type: "done", truncated: data.done_reason === "length" });
+          promptTokens = data.prompt_eval_count;
+          completionTokens = data.eval_count;
+          send({
+            type: "done",
+            truncated: data.done_reason === "length",
+            model: responseModel,
+            promptTokens,
+            completionTokens,
+          });
         }
       }
     }
-    if (assistantContent) addMessage(sessionId, "assistant", assistantContent);
+    if (assistantContent) {
+      addMessage(sessionId, "assistant", assistantContent, {
+        model: responseModel,
+        promptTokens,
+        completionTokens,
+      });
+    }
     return res.end();
   } catch (error) {
     if (error.name === "AbortError") return;

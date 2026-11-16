@@ -42,6 +42,13 @@ async function copyAll() {
                 <p v-else class="plain">{{ message.content }}</p>
             </div>
 
+            <div v-if="isAssistant && message.content && message.model" class="benchmark-info">
+                {{ message.model }} · {{ message.completionTokens ?? "?" }} tokens générés
+                <span v-if="message.promptTokens != null">
+                    · {{ message.promptTokens }} tokens de contexte
+                </span>
+            </div>
+
             <div v-if="isAssistant && message.content" class="actions">
                 <button class="link" @click="copyAll">{{ copied ? "Copié !" : "Copier la réponse" }}</button>
                 <template v-if="message.truncated && isLast">
@@ -131,6 +138,20 @@ async function copyAll() {
     margin-top: 4px;
     padding-left: 4px;
     font-size: 12px;
+}
+
+.benchmark-info {
+    margin-top: 4px;
+    padding-left: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+
+.content:hover .benchmark-info,
+.content:focus-within .benchmark-info {
+    opacity: 1;
 }
 
 .link {

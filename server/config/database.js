@@ -53,6 +53,9 @@ db.exec(`
     session_id TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
     content TEXT NOT NULL,
+    model TEXT,
+    prompt_tokens INTEGER,
+    completion_tokens INTEGER,
     created_at TEXT NOT NULL,
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
   );
@@ -61,6 +64,20 @@ db.exec(`
   ON messages(session_id, id);
 
 `);
+
+const messageColumns = db
+  .prepare("PRAGMA table_info(messages)")
+  .all()
+  .map((column) => column.name);
+if (!messageColumns.includes("model")) {
+  db.exec("ALTER TABLE messages ADD COLUMN model TEXT");
+}
+if (!messageColumns.includes("prompt_tokens")) {
+  db.exec("ALTER TABLE messages ADD COLUMN prompt_tokens INTEGER");
+}
+if (!messageColumns.includes("completion_tokens")) {
+  db.exec("ALTER TABLE messages ADD COLUMN completion_tokens INTEGER");
+}
 
 function now() {
   return new Date().toISOString();
@@ -212,7 +229,8 @@ export function getMessages(sessionId) {
   return db
     .prepare(
       `
-    SELECT role, content
+    SELECT role, content, model, prompt_tokens AS promptTokens,
+      completion_tokens AS completionTokens
     FROM messages
     WHERE session_id = ?
     ORDER BY id ASC
@@ -239,14 +257,23 @@ export function getRecentMessages(sessionId, limit = 20) {
     .all(sessionId, limit);
 }
 
-export function addMessage(sessionId, role, content) {
+export function addMessage(sessionId, role, content, metadata = {}) {
   const timestamp = now();
   db.prepare(
     `
-    INSERT INTO messages (session_id, role, content, created_at)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO messages
+      (session_id, role, content, model, prompt_tokens, completion_tokens, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `,
-  ).run(sessionId, role, content, timestamp);
+  ).run(
+    sessionId,
+    role,
+    content,
+    metadata.model ?? null,
+    metadata.promptTokens ?? null,
+    metadata.completionTokens ?? null,
+    timestamp,
+  );
   db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?").run(
     timestamp,
     sessionId,

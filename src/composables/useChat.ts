@@ -102,7 +102,24 @@ export function useChat() {
           if (!line.trim()) continue;
           const event = JSON.parse(line) as StreamEvent;
           if (event.type === "token") reply.content += event.content;
-          else if (event.type === "done") reply.truncated = event.truncated;
+          else if (event.type === "done") {
+            const model = "model" in event && typeof event.model === "string"
+              ? event.model
+              : undefined;
+            const promptTokens = "promptTokens" in event && typeof event.promptTokens === "number"
+              ? event.promptTokens
+              : undefined;
+            const completionTokens = "completionTokens" in event
+              && typeof event.completionTokens === "number"
+              ? event.completionTokens
+              : undefined;
+            Object.assign(reply, {
+              truncated: event.truncated,
+              model,
+              promptTokens,
+              completionTokens,
+            });
+          }
           else if (event.type === "sources") reply.sources = event.sources;
           else if (event.type === "error") throw new Error(event.message);
         }

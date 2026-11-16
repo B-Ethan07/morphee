@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import type { SessionSummary } from "../types";
 
 const MAX_RECENT = 12;
+const MAX_TITLE_WORDS = 3;
 
 const props = defineProps<{
     sessions: SessionSummary[];
@@ -24,6 +25,14 @@ const recent = computed(() =>
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
         .slice(0, MAX_RECENT),
 );
+
+function getShortTitle(title: string): string {
+    const words = title.trim().split(/\s+/);
+
+    return words.length > MAX_TITLE_WORDS
+        ? `${words.slice(0, MAX_TITLE_WORDS).join(" ")}…`
+        : title;
+}
 </script>
 
 <template>
@@ -36,7 +45,7 @@ const recent = computed(() =>
             <ul>
                 <li v-for="session in recent" :key="session.id" :class="{ active: session.id === activeSessionId }">
                     <button class="recent-open" type="button" :title="session.title"
-                        @click="emit('open', session.id)">{{ session.title }}</button>
+                        @click="emit('open', session.id)">{{ getShortTitle(session.title) }}</button>
                     <button class="recent-delete" type="button" title="Supprimer la conversation"
                         :aria-label="`Supprimer « ${session.title} »`" @click.stop="emit('delete', session.id)">
                         <FontAwesomeIcon :icon="faTrash" />
@@ -44,8 +53,7 @@ const recent = computed(() =>
                 </li>
             </ul>
 
-            <button class="show-all" :class="{ active: showAllActive }" type="button"
-                @click="emit('show-all')">
+            <button class="show-all" :class="{ active: showAllActive }" type="button" @click="emit('show-all')">
                 <FontAwesomeIcon :icon="faClockRotateLeft" fixed-width />
                 <span>Voir tout l'historique</span>
             </button>

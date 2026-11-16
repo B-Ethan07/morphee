@@ -65,10 +65,19 @@ export interface Message {
   error?: boolean;
   truncated?: boolean;
   sources?: string[];
+  model?: string;
+  promptTokens?: number;
+  completionTokens?: number;
 }
 
 export type StreamEvent =
   | { type: "token"; content: string }
-  | { type: "done"; truncated: boolean }
+  | {
+      type: "done";
+      truncated: boolean;
+      model?: string;
+      promptTokens?: number;
+      completionTokens?: number;
+    }
   | { type: "error"; message: string }
   | { type: "sources"; sources: string[] };
