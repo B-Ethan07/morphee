@@ -3,7 +3,13 @@ import { computed, ref } from "vue";
 import type { Message } from "../types";
 import { renderMarkdown } from "../utils/markdown";
 
-const props = defineProps<{ message: Message; isLast?: boolean }>();
+type ChatMessageData = Message & {
+    model?: string;
+    promptTokens?: number;
+    completionTokens?: number;
+};
+
+const props = defineProps<{ message: ChatMessageData; isLast?: boolean }>();
 const emit = defineEmits<{ continue: [] }>();
 
 const isAssistant = computed(() => props.message.role === "assistant" && !props.message.error);
@@ -42,19 +48,20 @@ async function copyAll() {
                 <p v-else class="plain">{{ message.content }}</p>
             </div>
 
-            <div v-if="isAssistant && message.content && message.model" class="benchmark-info">
-                {{ message.model }} · {{ message.completionTokens ?? "?" }} tokens générés
-                <span v-if="message.promptTokens != null">
-                    · {{ message.promptTokens }} tokens de contexte
-                </span>
-            </div>
-
-            <div v-if="isAssistant && message.content" class="actions">
-                <button class="link" @click="copyAll">{{ copied ? "Copié !" : "Copier la réponse" }}</button>
-                <template v-if="message.truncated && isLast">
-                    <span class="notice">Réponse tronquée (limite atteinte).</span>
-                    <button class="link accent" @click="emit('continue')">Continuer</button>
-                </template>
+            <div v-if="isAssistant && message.content" class="message-footer">
+                <div class="actions">
+                    <button class="link" @click="copyAll">{{ copied ? "Copié !" : "Copier la réponse" }}</button>
+                    <template v-if="message.truncated && isLast">
+                        <span class="notice">Réponse tronquée (limite atteinte).</span>
+                        <button class="link accent" @click="emit('continue')">Continuer</button>
+                    </template>
+                </div>
+                <div v-if="message.model" class="benchmark-info">
+                    {{ message.model }} · {{ message.completionTokens ?? "?" }} tokens générés
+                    <span v-if="message.promptTokens != null">
+                        · {{ message.promptTokens }} tokens de contexte
+                    </span>
+                </div>
             </div>
             <div v-if="isAssistant && message.sources?.length" class="sources">
                 Sources : {{ message.sources.join(", ") }}
@@ -131,21 +138,33 @@ async function copyAll() {
     overflow-wrap: anywhere;
 }
 
+.message-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+}
+
 .actions {
     display: flex;
+    flex: none;
     gap: 12px;
     align-items: center;
-    margin-top: 4px;
     padding-left: 4px;
     font-size: 12px;
 }
 
 .benchmark-info {
-    margin-top: 4px;
-    padding-left: 4px;
+    min-width: 0;
+    padding-right: 4px;
     color: var(--muted);
     font-size: 11px;
     opacity: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
     transition: opacity .15s ease;
 }
 
