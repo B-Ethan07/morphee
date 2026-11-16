@@ -2,6 +2,10 @@ import { Router } from "express";
 import { MODEL, OLLAMA_URL } from "./config.js";
 import { chatController } from "./controllers/chatController.js";
 import {
+  uploadDocument,
+  uploadDocumentMiddleware,
+} from "./controllers/documentController.js";
+import {
   deleteProfile,
   deleteSession,
   getLatestSession,
@@ -90,5 +94,10 @@ router.delete("/sessions/:id", (req, res) => {
   return res.status(204).end();
 });
 router.post("/chat", chatController);
+router.post(
+  "/documents/upload",
+  uploadDocumentMiddleware.single("file"),
+  uploadDocument,
+);
 
 export default router;

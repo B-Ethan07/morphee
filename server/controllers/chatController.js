@@ -11,6 +11,10 @@ import {
   getProfileById,
   saveProfile,
 } from "../database.js";
+import {
+  generateQueryEmbedding,
+  searchRelevantChunks,
+} from "../services/vectorService.js";
 
 export async function chatController(req, res) {
   const {
@@ -46,12 +50,19 @@ export async function chatController(req, res) {
   const send = (event) => res.write(JSON.stringify(event) + "\n");
 
   try {
+    const queryEmbedding = await generateQueryEmbedding(message.trim());
+    const chunks = await searchRelevantChunks(queryEmbedding, 5);
+    const context = chunks.map((chunk) => chunk.content).join("\n\n");
+    const finalSystemMessage = context
+      ? `${systemMessage}\n\nContexte documentaire:\n${context}\n\nUtilise ce contexte pour répondre. N'invente pas de faits absents du contexte.`
+      : systemMessage;
+
     const upstream = await fetch(`${OLLAMA_URL}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: typeof model === "string" && model.trim() ? model.trim() : MODEL,
-        messages: [{ role: "system", content: systemMessage }, ...history],
+        messages: [{ role: "system", content: finalSystemMessage }, ...history],
         stream: true,
         think,
         keep_alive: "5m",
@@ -59,7 +70,6 @@ export async function chatController(req, res) {
       }),
       signal: controller.signal,
     });
-
     if (!upstream.ok) {
       const errorText = await upstream.text();
       return res.status(502).json({ error: `Ollama a répondu : ${errorText}` });
@@ -70,7 +80,6 @@ export async function chatController(req, res) {
     const decoder = new TextDecoder();
     let buffer = "";
     let assistantContent = "";
-
     for await (const chunk of upstream.body) {
       buffer += decoder.decode(chunk, { stream: true });
       const lines = buffer.split("\n");
@@ -83,20 +92,21 @@ export async function chatController(req, res) {
           assistantContent += data.message.content;
           send({ type: "token", content: data.message.content });
         }
-        if (data.done)
+        if (data.done) {
           send({ type: "done", truncated: data.done_reason === "length" });
+        }
       }
     }
     if (assistantContent) addMessage(sessionId, "assistant", assistantContent);
-    res.end();
+    return res.end();
   } catch (error) {
     if (error.name === "AbortError") return;
-    const message =
+    const errorMessage =
       error.cause?.code === "ECONNREFUSED"
         ? "Ollama n'est pas lancé (http://localhost:11434)."
         : error.message;
-    if (!res.headersSent) return res.status(500).json({ error: message });
-    send({ type: "error", message });
-    res.end();
+    if (!res.headersSent) return res.status(500).json({ error: errorMessage });
+    send({ type: "error", message: errorMessage });
+    return res.end();
   }
 }

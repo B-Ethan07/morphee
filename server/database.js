@@ -6,7 +6,7 @@ import { randomUUID } from "node:crypto";
 const databasePath = resolve(process.env.DATA_DIR ?? "data", "chatbot.db");
 mkdirSync(dirname(databasePath), { recursive: true });
 
-const db = new Database(databasePath);
+export const db = new Database(databasePath);
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import pdf from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 
 /**
  * Parses a file and extracts its text content based on the file extension.
@@ -13,8 +13,13 @@ export async function parseFile(filePath) {
 
   switch (ext) {
     case ".pdf":
-      const data = await pdf(fileBuffer);
-      return data.text;
+      const parser = new PDFParse({ data: fileBuffer });
+      try {
+        const data = await parser.getText();
+        return data.text;
+      } finally {
+        await parser.destroy();
+      }
     case ".md":
     case ".txt":
     case ".js":
