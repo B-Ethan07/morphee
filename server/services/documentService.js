@@ -10,7 +10,11 @@ import { PDFParse } from "pdf-parse";
 export async function parseFile(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   const fileBuffer = fs.readFileSync(filePath);
+  return parseBuffer(path.basename(filePath), fileBuffer);
+}
 
+export async function parseBuffer(fileName, fileBuffer) {
+  const ext = path.extname(fileName).toLowerCase();
   switch (ext) {
     case ".pdf":
       const parser = new PDFParse({ data: fileBuffer });

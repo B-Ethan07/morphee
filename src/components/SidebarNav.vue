@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { faMessage, faSliders } from "@fortawesome/free-solid-svg-icons";
+import { faFileLines, faMessage, faSliders } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import type { Page } from "../navigation";
 
@@ -10,6 +10,7 @@ const emit = defineEmits<{ navigate: [page: Page] }>();
 const items = [
     { page: "chat", label: "Conversation", icon: faMessage },
     { page: "profile", label: "Profil LLM", icon: faSliders },
+    { page: "documents", label: "Documents", icon: faFileLines },
 ] as const;
 </script>
 

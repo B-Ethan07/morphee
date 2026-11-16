@@ -10,7 +10,7 @@ const props = defineProps<{
     model: string;
 }>();
 const emit = defineEmits<{
-    send: [text: string];
+    send: [text: string, document: File | null];
     stop: [];
     "select-profile": [id: string];
     "select-model": [model: string];
@@ -18,6 +18,8 @@ const emit = defineEmits<{
 const length = defineModel<Length>("length", { required: true });
 
 const text = ref("");
+const selectedDocument = ref<File | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 const el = ref<HTMLTextAreaElement | null>(null);
 const menu = ref<HTMLElement | null>(null);
 const open = ref(false);
@@ -43,10 +45,19 @@ function resize() {
 function submit() {
     const value = text.value.trim();
     if (!value || props.loading) return;
-    emit("send", value);
+    emit("send", value, selectedDocument.value);
     text.value = "";
+    selectedDocument.value = null;
     open.value = false;
     nextTick(resize);
+}
+
+function chooseDocument() {
+    fileInput.value?.click();
+}
+
+function onDocumentChange(e: Event) {
+    selectedDocument.value = (e.target as HTMLInputElement).files?.[0] ?? null;
 }
 
 // Entrée envoie, sauf pendant une composition IME (accents, clavier asiatique...)
@@ -84,11 +95,21 @@ watch(
 <template>
     <div class="chat-input">
         <form class="input" @submit.prevent="submit">
+            <input ref="fileInput" type="file" accept=".pdf,.md,.txt,.js,.ts,.json,.html,.css,.vue"
+                hidden @change="onDocumentChange" />
+            <div v-if="selectedDocument" class="attachment">
+                <span>{{ selectedDocument.name }}</span>
+                <button type="button" aria-label="Retirer le document"
+                    @click="selectedDocument = null">×</button>
+            </div>
             <textarea ref="el" v-model="text" rows="1" placeholder="Écrivez votre message..." @input="resize"
                 @keydown.enter.exact="onEnter"></textarea>
 
             <div class="bar">
                 <div ref="menu" class="tools">
+                    <button type="button" class="attach" aria-label="Joindre un document" @click="chooseDocument">
+                        Joindre
+                    </button>
                     <button type="button" class="tool" :class="{ open }" :aria-expanded="open"
                         aria-label="Réglages de la conversation" @click="open = !open">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
@@ -191,6 +212,37 @@ textarea:focus-visible {
     justify-content: space-between;
     gap: 8px;
     margin-top: 8px;
+}
+
+.attach {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.attachment {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.attachment span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.attachment button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
 }
 
 .tools {

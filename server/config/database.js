@@ -270,3 +270,17 @@ export function deleteSession(sessionId) {
     db.prepare("DELETE FROM sessions WHERE id = ?").run(sessionId).changes > 0
   );
 }
+
+export function listDocuments() {
+  return db
+    .prepare(
+      `SELECT id, name, status, created_at AS createdAt, updated_at AS updatedAt
+       FROM documents
+       ORDER BY created_at DESC`,
+    )
+    .all();
+}
+
+export function hasDocumentChunks() {
+  return Boolean(db.prepare("SELECT 1 FROM document_chunks LIMIT 1").get());
+}

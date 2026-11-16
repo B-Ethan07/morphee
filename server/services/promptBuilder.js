@@ -1,4 +1,4 @@
-import { LENGTHS, MODES, OUTPUT_FORMATS, SYSTEM_PROMPT } from "../config.js";
+import { LENGTHS, MODES, OUTPUT_FORMATS, SYSTEM_PROMPT } from "../config/config.js";
 
 function clamp(value, min, max, fallback) {
   return Number.isFinite(Number(value))

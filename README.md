@@ -19,6 +19,7 @@ Par défaut, le serveur utilise le modèle `gemma4:e4b` sur `http://localhost:11
 npm install
 ollama serve
 ollama pull gemma4:e4b
+ollama pull nomic-embed-text
 ```
 
 Les commandes `ollama` sont à exécuter dans un terminal séparé si le service n'est pas déjà lancé.
@@ -60,6 +61,7 @@ Le serveur accepte les variables d'environnement suivantes :
 | `PORT` | `3000` | Port du serveur Express |
 | `OLLAMA_URL` | `http://localhost:11434` | URL de l'API Ollama |
 | `MODEL` | `gemma4:e4b` | Modèle utilisé pour les réponses |
+| `EMBEDDING_MODEL` | `nomic-embed-text` | Modèle utilisé pour l'indexation et la recherche documentaire |
 
 Exemple PowerShell, sans écrire de valeur sensible dans le dépôt :
 
@@ -77,6 +79,7 @@ La barre latérale donne accès à deux pages :
 
 - **Conversation** : historique persistant, réponses en streaming, arrêt de génération, copie du Markdown et continuation des réponses tronquées. La barre de saisie liste les modèles Ollama installés et permet de choisir celui utilisé pour le prochain message.
 - **Profil du LLM** : configuration persistante du profil actif.
+- **Documents** : import de fichiers locaux et suivi de leur indexation pour le contexte RAG.
 
 Le profil est sauvegardé localement dans le navigateur. Il est envoyé avec chaque nouveau message et n'est pas ajouté à l'historique visible de la conversation.
 

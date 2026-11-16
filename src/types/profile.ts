@@ -1,4 +1,4 @@
-import type { Profile, ProfileMode } from "./types";
+import type { Profile, ProfileMode } from "../types";
 
 export const modes: { value: ProfileMode; label: string }[] = [
   { value: "rp", label: "Jeu de rôle" },

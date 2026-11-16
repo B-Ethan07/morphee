@@ -97,6 +97,18 @@ Réponse : `204`.
 
 ## Conversation
 
+## Documents
+
+### `GET /api/documents`
+
+Retourne les documents importés et leur état d'indexation (`pending`, `indexed` ou `error`).
+
+### `POST /api/documents/upload`
+
+Importe un fichier local via `multipart/form-data`, dans le champ `file`. Les formats acceptés sont PDF, Markdown, texte, JSON, HTML, CSS, Vue et fichiers JavaScript/TypeScript. La taille maximale est de 10 Mo.
+
+La réponse `201` contient l'identifiant du document et son état initial `indexing`. L'interface interroge ensuite `GET /api/documents` jusqu'à la fin de l'indexation.
+
 ### `POST /api/chat`
 
 Envoie un message, le modèle choisi, une longueur de réponse et un profil au serveur. La réponse est un flux NDJSON contenant des événements `token`, `done` ou `error`.
@@ -112,4 +124,4 @@ Envoie un message, le modèle choisi, une longueur de réponse et un profil au s
 }
 ```
 
-Le serveur filtre l'historique, limite les champs du profil et borne les paramètres techniques avant de les transmettre à Ollama.
+Le serveur filtre l'historique, limite les champs du profil et borne les paramètres techniques avant de les transmettre à Ollama. Le flux peut également contenir un événement `sources` listant les documents utilisés pour le contexte RAG.

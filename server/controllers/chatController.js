@@ -1,4 +1,5 @@
-import { OLLAMA_URL, MODEL } from "../config.js";
+import { OLLAMA_URL, MODEL } from "../config/config.js";
+import { chunkText, parseBuffer } from "../services/documentService.js";
 import {
   buildPromptProfile,
   sanitizeHistory,
@@ -9,22 +10,31 @@ import {
   getRecentMessages,
   getSession,
   getProfileById,
+  hasDocumentChunks,
   saveProfile,
-} from "../database.js";
+} from "../config/database.js";
 import {
   generateQueryEmbedding,
   searchRelevantChunks,
 } from "../services/vectorService.js";
 
 export async function chatController(req, res) {
+  const body = req.body ?? {};
+  let requestProfile = body.profile ?? {};
+  if (typeof requestProfile === "string") {
+    try {
+      requestProfile = JSON.parse(requestProfile);
+    } catch {
+      return res.status(400).json({ error: "Profil invalide." });
+    }
+  }
   const {
     sessionId: requestedSessionId,
     profileId,
     message,
     model = MODEL,
     length = "normal",
-    profile = {},
-  } = req.body ?? {};
+  } = body;
   if (typeof message !== "string" || !message.trim()) {
     return res.status(400).json({ error: "Le champ 'message' est requis." });
   }
@@ -32,7 +42,7 @@ export async function chatController(req, res) {
   const selectedProfile =
     typeof profileId === "string" && getProfileById(profileId)
       ? getProfileById(profileId)
-      : profile;
+      : requestProfile;
   const savedProfileId = saveProfile(selectedProfile, profileId);
   const sessionId =
     typeof requestedSessionId === "string" && getSession(requestedSessionId)
@@ -50,9 +60,19 @@ export async function chatController(req, res) {
   const send = (event) => res.write(JSON.stringify(event) + "\n");
 
   try {
-    const queryEmbedding = await generateQueryEmbedding(message.trim());
-    const chunks = await searchRelevantChunks(queryEmbedding, 5);
-    const context = chunks.map((chunk) => chunk.content).join("\n\n");
+    let context = "";
+    let sources = [];
+    if (req.file) {
+      const documentText = await parseBuffer(req.file.originalname, req.file.buffer);
+      const chunks = chunkText(documentText);
+      context = chunks.join("\n\n");
+      sources = [req.file.originalname];
+    } else if (hasDocumentChunks()) {
+      const queryEmbedding = await generateQueryEmbedding(message.trim());
+      const chunks = await searchRelevantChunks(queryEmbedding, 5);
+      context = chunks.map((chunk) => chunk.content).join("\n\n");
+      sources = [...new Set(chunks.map((chunk) => chunk.name))];
+    }
     const finalSystemMessage = context
       ? `${systemMessage}\n\nContexte documentaire:\n${context}\n\nUtilise ce contexte pour répondre. N'invente pas de faits absents du contexte.`
       : systemMessage;
@@ -77,6 +97,7 @@ export async function chatController(req, res) {
 
     res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache");
+    if (sources.length) send({ type: "sources", sources });
     const decoder = new TextDecoder();
     let buffer = "";
     let assistantContent = "";

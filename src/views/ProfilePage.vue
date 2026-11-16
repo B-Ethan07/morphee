@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { modes } from "../profile";
+import { modes } from "../types/profile";
 import type { Profile, SavedProfile } from "../types";
 
 const props = defineProps<{

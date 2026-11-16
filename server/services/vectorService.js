@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { db } from "../database.js";
+import { db } from "../config/database.js";
+import { EMBEDDING_MODEL, OLLAMA_URL } from "../config/config.js";
 
 const OLLAMA_EMBEDDING_URL =
-  process.env.OLLAMA_EMBEDDING_URL || "http://localhost:11434/api/embeddings";
-const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || "nomic-embed-text";
+  process.env.OLLAMA_EMBEDDING_URL || `${OLLAMA_URL}/api/embeddings`;
 
 /**
  * Generates embeddings for a set of text chunks using Ollama.
@@ -22,7 +22,10 @@ export async function generateEmbeddings(documentId, chunks) {
       }),
     });
     if (!response.ok) {
-      throw new Error(`Ollama embeddings a répondu ${response.status}.`);
+      const error = await response.text();
+      throw new Error(
+        `Ollama embeddings a répondu ${response.status} pour le modèle "${EMBEDDING_MODEL}". ${error}`,
+      );
     }
     const data = await response.json();
     if (!Array.isArray(data.embedding)) {
@@ -46,7 +49,10 @@ export async function generateQueryEmbedding(text) {
     body: JSON.stringify({ model: EMBEDDING_MODEL, prompt: text }),
   });
   if (!response.ok) {
-    throw new Error(`Ollama embeddings a répondu ${response.status}.`);
+    const error = await response.text();
+    throw new Error(
+      `Ollama embeddings a répondu ${response.status} pour le modèle "${EMBEDDING_MODEL}". ${error}`,
+    );
   }
   const data = await response.json();
   if (!Array.isArray(data.embedding)) {
@@ -65,7 +71,11 @@ export async function generateQueryEmbedding(text) {
 export async function searchRelevantChunks(queryEmbedding, topK = 5) {
   if (!Array.isArray(queryEmbedding) || queryEmbedding.length === 0) return [];
   const chunks = db
-    .prepare("SELECT content, embedding FROM document_chunks")
+    .prepare(
+      `SELECT document_chunks.content, document_chunks.embedding, documents.name
+       FROM document_chunks
+       JOIN documents ON documents.id = document_chunks.document_id`,
+    )
     .all();
   const magnitude = (values) =>
     Math.sqrt(values.reduce((sum, value) => sum + value * value, 0));
@@ -83,7 +93,7 @@ export async function searchRelevantChunks(queryEmbedding, topK = 5) {
               (sum, value, index) => sum + value * (queryEmbedding[index] ?? 0),
               0,
             ) / denominator;
-      return { content: chunk.content, score };
+      return { content: chunk.content, name: chunk.name, score };
     })
     .sort((left, right) => right.score - left.score)
     .slice(0, topK);

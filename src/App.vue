@@ -4,6 +4,7 @@ import AppSidebar from "./components/AppSidebar.vue";
 import ChatPage from "./views/ChatPage.vue";
 import HistoryPage from "./views/HistoryPage.vue";
 import ProfilePage from "./views/ProfilePage.vue";
+import DocumentsPage from "./views/DocumentsPage.vue";
 import { useChat } from "./composables/useChat";
 import { useModels } from "./composables/useModels";
 import { useProfiles } from "./composables/useProfiles";
@@ -31,8 +32,8 @@ const conversationTitle = computed(() =>
     ?? "Nouvelle conversation",
 );
 
-async function ask(text: string) {
-    await send(text, profile.value.length, { ...profile.value }, profileId.value, model.value);
+async function ask(text: string, document: File | null = null) {
+    await send(text, profile.value.length, { ...profile.value }, profileId.value, model.value, document);
     await refreshSessions();
     page.value = "chat";
 }
@@ -75,6 +76,7 @@ onMounted(async () => {
                 @select-profile="selectProfile" @select-model="selectModel" />
             <HistoryPage v-else-if="page === 'history'" :sessions="sessions" :current-session-id="currentSessionId"
                 @open="openSession" @delete="removeSession" />
+            <DocumentsPage v-else-if="page === 'documents'" />
             <ProfilePage v-else v-model="profile" :loading="loading" :profiles="profiles" :profile-id="profileId"
                 @save-profile="saveProfile" @select-profile="selectProfile" @new-profile="createProfile"
                 @delete-profile="removeProfile" />

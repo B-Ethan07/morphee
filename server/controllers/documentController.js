@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
-import { db } from "../database.js";
+import { db } from "../config/database.js";
 import { parseFile, chunkText } from "../services/documentService.js";
 import { generateEmbeddings } from "../services/vectorService.js";
 
@@ -12,6 +12,17 @@ export const uploadDocumentMiddleware = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
 });
+
+export function listDocuments(_req, res) {
+  const documents = db
+    .prepare(
+      `SELECT id, name, status, created_at AS createdAt, updated_at AS updatedAt
+       FROM documents
+       ORDER BY created_at DESC`,
+    )
+    .all();
+  return res.json(documents);
+}
 
 export async function uploadDocument(req, res) {
   if (!req.file) {

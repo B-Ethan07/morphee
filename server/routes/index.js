@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { MODEL, OLLAMA_URL } from "./config.js";
-import { chatController } from "./controllers/chatController.js";
+import { MODEL, OLLAMA_URL } from "../config/config.js";
 import {
+  listDocuments,
   uploadDocument,
   uploadDocumentMiddleware,
-} from "./controllers/documentController.js";
+} from "../controllers/documentController.js";
+import { chatController } from "../controllers/chatController.js";
 import {
   deleteProfile,
   deleteSession,
@@ -16,7 +17,7 @@ import {
   listSessions,
   listProfiles,
   saveProfile,
-} from "./database.js";
+} from "../config/database.js";
 
 const router = Router();
 
@@ -93,7 +94,8 @@ router.delete("/sessions/:id", (req, res) => {
   deleteSession(req.params.id);
   return res.status(204).end();
 });
-router.post("/chat", chatController);
+router.post("/chat", uploadDocumentMiddleware.single("document"), chatController);
+router.get("/documents", listDocuments);
 router.post(
   "/documents/upload",
   uploadDocumentMiddleware.single("file"),

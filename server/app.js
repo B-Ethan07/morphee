@@ -1,7 +1,7 @@
 import express from "express";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import apiRoutes from "./routes.js";
+import apiRoutes from "./routes/index.js";
 import { errorHandler, jsonBody, notFound } from "./middleware/http.js";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");

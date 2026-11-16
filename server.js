@@ -1,5 +1,5 @@
 import { createApp } from "./server/app.js";
-import { PORT } from "./server/config.js";
+import { PORT } from "./server/config/config.js";
 
 const app = createApp();
 

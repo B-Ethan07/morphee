@@ -51,6 +51,7 @@ export function useChat() {
     profile: Profile,
     profileId: string,
     model: string,
+    document: File | null = null,
   ) {
     text = text.trim();
     if (!text || loading.value) return;
@@ -65,17 +66,18 @@ export function useChat() {
     controller = new AbortController();
 
     try {
+      const body = new FormData();
+      body.append("message", text);
+      body.append("length", length);
+      body.append("profileId", profileId);
+      body.append("profile", JSON.stringify(profile));
+      body.append("model", model);
+      body.append("sessionId", sessionId);
+      if (document) body.append("document", document);
+
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          message: text,
-          length,
-          profileId,
-          profile,
-          model,
-        }),
+        body,
         signal: controller.signal,
       });
 
@@ -101,6 +103,7 @@ export function useChat() {
           const event = JSON.parse(line) as StreamEvent;
           if (event.type === "token") reply.content += event.content;
           else if (event.type === "done") reply.truncated = event.truncated;
+          else if (event.type === "sources") reply.sources = event.sources;
           else if (event.type === "error") throw new Error(event.message);
         }
       }

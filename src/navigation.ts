@@ -1,1 +1,1 @@
-export type Page = "chat" | "profile" | "history";
+export type Page = "chat" | "profile" | "history" | "documents";

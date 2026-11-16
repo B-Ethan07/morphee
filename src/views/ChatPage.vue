@@ -14,7 +14,7 @@ const props = defineProps<{
     conversationTitle: string;
 }>();
 const emit = defineEmits<{
-    send: [text: string];
+    send: [text: string, document: File | null];
     stop: [];
     reset: [];
     "select-profile": [id: string];
@@ -30,9 +30,9 @@ const suggestions = [
     "Comment fonctionne le RAG, en simple ?",
 ];
 
-function ask(text: string) {
+function ask(text: string, document: File | null = null) {
     stick = true;
-    emit("send", text);
+    emit("send", text, document);
 }
 
 function onScroll() {

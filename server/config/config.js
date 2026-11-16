@@ -1,6 +1,8 @@
 export const PORT = process.env.PORT ?? 3000;
 export const OLLAMA_URL = process.env.OLLAMA_URL ?? "http://localhost:11434";
 export const MODEL = process.env.MODEL ?? "gemma4:e4b";
+export const EMBEDDING_MODEL =
+  process.env.EMBEDDING_MODEL ?? "nomic-embed-text";
 
 export const LENGTHS = {
   minimal: {

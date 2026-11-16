@@ -49,6 +49,9 @@ async function copyAll() {
                     <button class="link accent" @click="emit('continue')">Continuer</button>
                 </template>
             </div>
+            <div v-if="isAssistant && message.sources?.length" class="sources">
+                Sources : {{ message.sources.join(", ") }}
+            </div>
         </div>
     </div>
 </template>
@@ -146,6 +149,13 @@ async function copyAll() {
 
 .notice {
     color: var(--muted);
+}
+
+.sources {
+    margin-top: 6px;
+    padding-left: 4px;
+    color: var(--muted);
+    font-size: 12px;
 }
 
 /* Indicateur de frappe */
